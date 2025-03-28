@@ -1,0 +1,11 @@
+<odoo noupdate="0">
+        <record id="ir_cron_send_email_if_over_25_hours" model="ir.cron">
+            <field name="name">Send Email if Over 25 Hours</field>
+            <field name="model_id" ref="model_isy_ticketing_requests"/>
+            <field name="state">code</field>
+            <field name="code">model.send_email_if_over_25_hours()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+        </record>
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="new_tyr_received_approved_template">
+        <body>
+            Technology request is approved.
+            <ul>
+                <li>Reference Ticket Number:
+                    <t t-esc="object.name"/>
+                </li>
+                <li>Original Request Body:
+                    <t t-raw="object.body"/></li>
+                <li>Special Note:<t t-esc="object.special_note"/></li>
+            </ul>
+
+            <a
+                t-att-href="object.get_record_url()"
+                class="btn btn-beta"
+                style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;"
+                data-original-title=""
+                title=""
+                aria-describedby="tooltip108011">Go to Request</a>
+        </body>
+    </template>
+
+    <template id="new_tyr_received_template">
+        <body>
+            Technology request is received.
+            <ul>
+                <li>Reference Ticket Number:
+                    <t t-esc="object.name"/></li>
+                <li>Original Request Subject:
+                    <t t-esc="object.subject"/></li>
+                <li>Original Request Body:
+                    <t t-raw="object.body"/></li>
+                <li>Location:
+                    <t t-raw="object.location_id.name"/></li>
+                <li>Special Note:
+                    <t t-esc="object.special_note"/></li>
+            </ul>
+            <a
+                t-att-href="object.get_record_url()"
+                class="btn btn-beta"
+                style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;"
+                data-original-title=""
+                title=""
+                aria-describedby="tooltip108011">Go to Request</a>
+        </body>
+    </template>
+
+    <template id="new_tyr_progress_template">
+        <body>
+            <t t-esc="object.assign_person.name"/> is working on this task.
+            <ul>
+                <li>Reference Ticket Number:
+                    <t t-esc="object.name"/></li>
+                <li>Subject:
+                    <t t-esc="object.subject"/></li>
+                <li>Original Request Body:
+                    <t t-raw="object.body"/></li>
+                <li>Special Note:
+                    <t t-esc="object.special_note"/></li>
+            </ul>
+
+            <a
+                t-att-href="object.get_record_url()"
+                class="btn btn-beta"
+                style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;"
+                data-original-title=""
+                title=""
+                aria-describedby="tooltip108011">Go to Request</a>
+        </body>
+    </template>
+
+</odoo>

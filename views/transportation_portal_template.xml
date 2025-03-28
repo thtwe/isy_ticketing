@@ -1,0 +1,99 @@
+<odoo>
+    <data>
+        <!-- Complete page of the maintenance Request -->
+
+        <template id="transportation_requests" name="Portal layout : transportation menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
+            <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+                <li t-if="page_name == 'transportation_request' or transportation_request" t-attf-class="breadcrumb-item #{'active ' if not transportation_request else ''}">
+                    <a t-if="transportation_requests" t-attf-href="/my/transportation_requests?{{ keep_query() }}">Transportation Requests</a>
+                    <t t-else="">Transportation Requests</t>
+                </li>
+                <li t-if="transportation_request" class="breadcrumb-item active">
+                    <t t-esc="transportation_request.name"/>
+                </li>
+            </xpath>
+        </template>
+
+        <template id="portal_transportation_requests" name="Transportation Request Portal" inherit_id="portal.portal_my_home" priority="40">
+            <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+                <t t-if="request.env.user.portal_transportation_request or request.env.user.portal_transportation_request_user" t-call="isy_ticketing.portal_docs_entry">
+                    <t t-set="title">Transportation Requests</t>
+                    <t t-set="url" t-value="'/my/transportation_requests'"/>
+                    <t t-set="count" t-value="transportation_requests_count"/>
+                </t>
+            </xpath>
+        </template>
+
+        <template id="portal_my_transportation_requests" name="My Transportation Requests">
+            <t t-call="portal.portal_layout">
+                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+                <t t-call="portal.portal_searchbar">
+                    <t t-set="title">Transportation Requests</t>
+                </t>
+                <hr/>
+                <div class="row">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <a t-attf-href="/web#view_type=form&amp;model=isy.ticketing.requests&amp;&amp;action=isy_ticketing.menu_transportation_request_action    " class="btn btn-info">New Transportation Request</a>
+                        </div>
+                    </div>
+                </div>
+                <hr/>
+                <t t-call="portal.portal_table">
+                    <thead>
+                        <tr class="active">
+                            <th></th>
+                            <th>Ref #</th>
+                            <th>Building</th>
+                            <th>Request Type</th>
+                            <th>Opened</th>
+                            <th>Due Date</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Pickup Location</th>
+                            <th>Dropoff Location</th>
+                            <th>Resolved Date</th>
+                            <th>No. Of Passengers
+                            </th>
+                            <th>Vehicle</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="transportation_requests" t-as="me_req">
+                            <tr>
+                                <td>
+                                    <a class="btn btn-info" t-att-href="'/web#return_label=Website&amp;model=isy.ticketing.requests&amp;id=%s&amp;view_type=form' % (me_req.id)">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.name" t-if="me_req.name"/>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.building_id.name" t-if="me_req.building_id"/>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.request_type_id.name" t-if="me_req.request_type_id"/>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.create_uid.name" t-if="me_req.create_uid"/>
+                                </td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.due_date"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.date_from"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.date_to"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.pick_up_location"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.dropoff_location"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.resolved_date"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.no_of_passengers"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.fleet"/></td>
+                                <td class="text-center"><span class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

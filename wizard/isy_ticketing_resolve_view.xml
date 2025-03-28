@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_isy_ticketing_resolve_wizard" model="ir.ui.view">
+            <field name="name">ISY Ticketing Requests Resolve Wizard</field>
+            <field name="model">isy.ticketing.resolve.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Choose The Details">
+                    <group>
+                        <group>
+                            <field name="name" required="1"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="resolve_wizard" string="Done" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_isy_driver_allocation" model="ir.ui.view">
+            <field name="name">ISY Driver Allocation</field>
+            <field name="model">isy.driver.allocation</field>
+            <field name="arch" type="xml">
+                <form string="Driver Allocation">
+                    <group>
+                        <group>
+                            <field name="name" required="1" domain="[('portal_transportation_request_driver','=',True),('check_availability','=',True)]" options="{'no_create': True}"/>
+                            <field name="date_from" invisible="1"/>
+                            <field name="date_to" invisible="1"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="apply_driver" string="Done" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,24 @@
+<odoo>
+    <data>
+        <!-- Complete page of the maintenance Request -->
+
+        <template id="portal_docs_entry" name="My Portal Docs Entry">
+            <a t-att-href="url" t-att-target="'_blank'" t-att-title="title" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">
+                <t t-esc="title"/>
+                <span class="badge badge-secondary badge-pill" t-esc="count"/>
+            </a>
+        </template>
+
+        <template id="portal_stationary_requests" name="Stationary Request Portal" inherit_id="portal.portal_my_home" priority="90">
+            <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+                <t t-call="isy_ticketing.portal_docs_entry">
+                    <t t-set="title">Stationery Requests</t>
+                    <t t-set="url" t-value="'http://stationery.isyedu.org/login.php?email='+ request.env.user.login+'&amp;staff_id='+str(request.env['hr.employee'].sudo().search([('user_id','=',request.env.user.id)]).barcode)"></t>
+                    <t t-if="stationery_requests_count>0">
+                        <t t-set="count" t-value="stationery_requests_count"/>
+                    </t>
+                </t>
+            </xpath>
+        </template>
+    </data>
+</odoo>

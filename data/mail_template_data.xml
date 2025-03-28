@@ -1,0 +1,728 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="blank_template" model="mail.template">
+            <field name="name">No template found</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">no template found</field>
+            <field name="email_to"></field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                No Template Found.
+                ]]>
+            </field>
+        </record>
+        <!--- Only Send Email to channel by using this template -->
+        <record id="mr_received" model="mail.template">
+            <field name="name">Facility Request Received</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} facility request created</field>
+            <field name="email_to">{{object.approver_ids.login}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear object.approver_ids.name,<br/><br/>
+                <t t-out="object.create_uid.partner_id.name"/> has issued a new facility request and needs your approval.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1216&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="mr_to_approve" model="mail.template">
+            <field name="name">Facility Request To Approve</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} facility request to approve</field>
+            <field name="email_to">{{object.get_emails_list('mr_received')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear Paul Sicard,<br/><br/>
+                A facility request needs your approval.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1216&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="mr_reminder" model="mail.template">
+            <field name="name">Facility Request Reminder</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - facility request awaiting confirmation</field>
+            <field name="email_to">{{object.approver_ids.login}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear <t t-out="object.approver_ids.name" data-oe-t-inline="true" contenteditable="false"></t>,<br><br>
+                <t t-out="object.create_uid.partner_id.name"/> has issued a new facility request and it is awaiting your confirmation. Please check your email inbox for the request to approve or click on the link below.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1216&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="mr_update" model="mail.template">
+            <field name="name">Facility Request Update</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} facility request note has been updated</field>
+            <field name="email_to">{{ object.create_uid.partner_id.email }}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear object.create_uid.partner_id.email,<br/><br/>
+                The facility request note has been updated.
+                    <ul>
+                        <li>Note : <t t-out="object.description"/> </li>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1216&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="mr_received_approved" model="mail.template">
+            <field name="name">Facility Request Approved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} facility request approved</field>
+            <field name="email_to">{{object.get_emails_list('mr_received_approved')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.write_uid.partner_id.name"/> has approved:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/></li>
+                        <li>Assigned Users: <t t-out="object.get_assign_users()"/></li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1216&model=isy.ticketing.requests&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="mr_received_approved_resolved" model="mail.template">
+            <field name="name">Facility Request Resolved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} facility request resolved</field>
+            <field name="email_to">{{object.get_emails_list('mr_received_approved_resolved')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.write_uid.partner_id.name"/> request has resolved:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1216&model=isy.ticketing.requests&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="mr_cancelled" model="mail.template">
+            <field name="name">Facility Request Cancelled</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} Facility request cancelled</field>
+            <field name="email_to">{{object.get_emails_list('mr_cancelled')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear <t t-out="object.create_uid.partner_id.name"/>, <br/>
+                Your facility request has been cancelled.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Description: <t t-out="object.description"/> </li>
+                        <li>Cancellation Reason: <t t-out="object.cancellation_reason"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1216&model=isy.ticketing.requests&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="tyr_received" model="mail.template">
+            <field name="name">Technology Request Received</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} technology request created</field>
+            <field name="email_to">{{object.get_emails_list()}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.create_uid.partner_id.name"/> has issued a new technology request:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Request: <t t-out="object.request"/> </li>
+                        <li>Building: <t t-out="object.building_id.name"/> </li>
+                        <li>Location: <t t-out="object.location_id.name"/> </li>
+                        <li>Technology Equipment Requested: <t t-out="object.tech_equipment_requested"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Start Time: <t t-out="object.time_to_localtz('start_time')"/> </li>
+                        <li>End Time: <t t-out="object.time_to_localtz('end_time')"/> </li>
+                        <li>Technician Needed: <t t-out="object.technician_needed.name"/> </li>
+                        <li>Quantity: <t t-out="object.quantity"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="tyr_received_approved" model="mail.template">
+            <field name="name">Technology Request Approved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} technology request approved</field>
+            <field name="email_to">{{object.get_emails_list()}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.write_uid.partner_id.name"/> has approved:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Request: <t t-out="object.request"/> </li>
+                        <li>Building: <t t-out="object.building_id.name"/> </li>
+                        <li>Location: <t t-out="object.location_id.name"/> </li>
+                        <li>Technology Equipment Requested: <t t-out="object.tech_equipment_requested"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Start Time: <t t-out="object.time_to_localtz('start_time')"/> </li>
+                        <li>End Time: <t t-out="object.time_to_localtz('end_time')"/> </li>
+                        <li>Technician Needed: <t t-out="object.technician_needed.name"/> </li>
+                        <li>Quantity: <t t-out="object.quantity"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="tyr_received_approved_resolved" model="mail.template">
+            <field name="name">Technology Request Resolved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} technology request resolved</field>
+            <field name="email_to">{{object.get_emails_list()}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.write_uid.partner_id.name"/> has resolved:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Request: <t t-out="object.request"/> </li>
+                        <li>Building: <t t-out="object.building_id.name"/> </li>
+                        <li>Location: <t t-out="object.location_id.name"/> </li>
+                        <li>Technology Equipment Requested: <t t-out="object.tech_equipment_requested"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Start Time: <t t-out="object.time_to_localtz('start_time')"/> </li>
+                        <li>End Time: <t t-out="object.time_to_localtz('end_time')"/> </li>
+                        <li>Technician Needed: <t t-out="object.technician_needed.name"/> </li>
+                        <li>Quantity: <t t-out="object.quantity"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="new_tyr_received" model="mail.template">
+            <field name="name">Technology Request Received ( Email )</field>
+            <field name="body_type">qweb</field>
+            <field name="body_view_id" ref="new_tyr_received_template"/>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} [ Technology Request Received ]</field>
+            <field name="email_to">{{object.get_emails_list()}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
+            <field name="auto_delete" eval="False"/>
+        </record>
+
+        <record id="new_tyr_received_approved" model="mail.template">
+            <field name="name">Technology Request Approved ( Email )</field>
+            <field name="body_type">qweb</field>
+            <field name="body_view_id" ref="new_tyr_received_approved_template"/>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} [ Technology Request Approved ]</field>
+            <field name="email_to">{{object.get_emails_list()}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
+            <field name="auto_delete" eval="False"/>
+        </record>
+
+        <record id="new_tyr_received_approved_resolved" model="mail.template">
+            <field name="name">Technology Request Resolved ( Email )</field>
+            <field name="email_from">noreply@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} [ Technology Request Resolved ]</field>
+            <field name="email_to">{{object.get_emails_list()}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <ul>
+                  <li>Technology request is resolved.</li>
+                  <li>Reference Ticket Number: <t t-out="object.name"/></li>
+                  <li>If your request is not actually resolved yet, please click the link below to login and re-open your request: <br/>
+                  <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1230&model=isy.technology.request&view_type=form&menu_id=764" target="_blank" >Re-open</a>
+                  </li>
+                </ul>
+                <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1230&model=isy.technology.request&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+
+                ]]>
+            </field>
+        </record>
+
+        <record id="new_tyr_progress" model="mail.template">
+            <field name="name">Technology Request Assigned ( Email )</field>
+            <field name="body_type">qweb</field>
+            <field name="body_view_id" ref="new_tyr_progress_template"/>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} [ Technology Request Assigned ]</field>
+            <field name="email_to">{{object.assign_person.work_email}},{{object.request_person_email}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
+            <field name="auto_delete" eval="False"/>
+        </record>
+
+        <record id="new_tyr_rejected" model="mail.template">
+            <field name="name">Technology Request Rejected ( Email )</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} [ Technology Request Rejected ]</field>
+            <field name="email_to">{{object.get_emails_list()}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <ul>
+                  <li>
+                    Technology request is rejected.
+                  </li>
+                  <li>
+                    Reference Ticket Number: <t t-out="object.name"/>
+                  </li>
+                </ul>
+                <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1230&model=isy.technology.request&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="new_tyr_reminder" model="mail.template">
+            <field name="name">Technology Request Reminder ( Email )</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} [ Technology Request Action Reminder ]</field>
+            <field name="email_to">{{object.get_emails_list()}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <ul>
+                  <li>
+                    There has no action for ticket number <t t-out="object.name"/> yet.
+                  </li>
+                  <li>
+                    Status: <t t-out="object.state"/>
+                  </li>
+                </ul>
+                <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1230&model=isy.technology.request&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="ser_received" model="mail.template">
+            <field name="name">Schedule Request Created</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} [ New Scheduel Request Created ]</field>
+            <field name="email_to">{{object.get_emails_list('ser_received')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.create_uid.partner_id.name"/> has issued a new schedule request:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Request: <t t-out="object.event_name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Location: <t t-out="object.stock_location_id.name"/></li>
+                        <li>Start: <t t-out="object.schedule_start_date"/></li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="ser_received_approved" model="mail.template">
+            <field name="name">Schedule Request Approved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} schedule request approved</field>
+            <field name="email_to">{{object.get_emails_list('ser_received_approved')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.write_uid.partner_id.name"/> has approved:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Request: <t t-out="object.event_name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Location: <t t-out="object.stock_location_id.name"/></li>
+                        <li>Start: <t t-out="object.schedule_start_date"/></li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&model=isy.ticketing.requests&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="ser_cancelled" model="mail.template">
+            <field name="name">Schedule Request Cancelled</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} schedule request cancelled</field>
+            <field name="email_to">{{object.get_emails_list('ser_cancelled')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.write_uid.partner_id.name"/> has been cancelled:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Request: <t t-out="object.event_name"/> </li>
+                        <li>Building: <t t-out="object.stock_building_id.name"/> </li>
+                        <li>Location: <t t-out="object.stock_location_id.name"/></li>
+                        <li>Start: <t t-out="object.schedule_start_date"/></li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&model=isy.ticketing.requests&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="tnr_received" model="mail.template">
+            <field name="name">Transportation Request Received</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} transportation request created</field>
+            <field name="email_to">{{object.get_emails_list('tnr_received')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.create_uid.partner_id.name"/> has issued a new transportation request.
+                Please assign the vehicle and driver and then request to approve.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Description: <t t-out="object.description"/></li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1220&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="tnr_received_toapprove" model="mail.template">
+            <field name="name">Transportation Request Received To Approve</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} transportation request to approve</field>
+            <field name="email_to">{{object.get_emails_list('tnr_received_toapprove')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear John Whalen,<br/><br/>
+                A transportation request needs your approval.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Description: <t t-out="object.description"/></li>
+                        <li>Driver: <t t-out="object.driver_id.name"/> </li>
+                        <li>Vehicle: <t t-out="object.fleet.name"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1220&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="tnr_received_approved" model="mail.template">
+            <field name="name">Transportation Request Approved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} transportation request approved</field>
+            <field name="email_to">{{object.get_emails_list('tnr_received_approved')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.write_uid.partner_id.name"/> has approved:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Assigned Users: <t t-out="object.get_assign_users()"/></li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Description: <t t-out="object.description"/></li>
+                        <li>Driver: <t t-out="object.driver_id.name"/> </li>
+                        <li>Vehicle: <t t-out="object.fleet.model_id.name"/></li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1220&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <!--- Only Send Email to channel by using this template -->
+        <record id="tnr_received_approved_resolved" model="mail.template">
+            <field name="name">Transportation Request Resolved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} transportation request resolved</field>
+            <field name="email_to">{{object.get_emails_list('tnr_received_approved_resolved')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                <t t-out="object.write_uid.partner_id.name"/> request has resolved:
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1220&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="tnr_cancelled" model="mail.template">
+            <field name="name">Transportation Request Cancelled</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">Ref - {{object.name}} Transportation request cancelled</field>
+            <field name="email_to">{{object.get_emails_list('tnr_cancelled')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear <t t-out="object.create_uid.partner_id.name"/>, <br/>
+                Your transportation request has been cancelled.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Request: <t t-out="object.event_name"/> </li>
+                        <li>Start: <t t-out="object.schedule_start_date"/></li>
+                        <li>Cancellation Reason: <t t-out="object.cancellation_reason"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&model=isy.ticketing.requests&view_type=form&menu_id=764"  class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="tnr_driver_assign" model="mail.template">
+            <field name="name">Transportation Request Assign Driver</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.driver_id.partner_id.name}} [ Driver Assigned ]</field>
+            <!-- <field name="email_to">{{object.driver_id.partner_id.email}}</field> -->
+            <field name="email_to">{{object.get_emails_list('tnr_driver_assign')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <t t-out="object.driver_id.partner_id.name"/> have been assign as driver for transportation request.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Driver: <t t-out="object.driver_id.partner_id.name"/></li>
+                        <li>Vehicle: <t t-out="object.fleet.model_id.name"/></li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>From Date: <t t-out="object.date_from_toshow"/> </li>
+                        <li>To Date: <t t-out="object.date_to_toshow"/> </li>
+                        <li>Pickup Location: <t t-out="object.pick_up_location"/> </li>
+                        <li>Dropoff Location: <t t-out="object.dropoff_location"/> </li>
+                        <li>Number of Passengers: <t t-out="object.no_of_passengers"/> </li>
+                        <li>Description: <t t-out="object.description"/></li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1220&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+        <record id="tnr_driver_assign_requestor_info" model="mail.template">
+            <field name="name">Transportation Request Driver Assign Information</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.driver_id.partner_id.name}} [ Driver Assigned Information ]</field>
+            <!-- <field name="email_to">{{object.driver_id.partner_id.email}</field> -->
+            <field name="email_to">{{object.get_emails_list('tnr_driver_assign_requestor_info')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    Please see the information below to see the allocated driver for your transportation request.
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Request Type: <t t-out="object.request_type_id.name"/> </li>
+                        <li>Due Date: <t t-out="object.due_date"/> </li>
+                        <li>Description: <t t-out="object.description"/></li>
+                        <li>Driver: <t t-out="object.driver_id.partner_id.name"/></li>
+                        <li>Vehicle: <t t-out="object.fleet.model_id.name"/></li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1220&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+        <!-- Audio Visual Request related email templates-->
+        <record id="alr_received" model="mail.template">
+            <field name="name">Audio / Visual Request Received</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} audio / visual request created</field>
+            <field name="email_to">{{object.approver_id.login}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_audio_request"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear <t t-out="object.approver_id.name"/>,<br/><br/>
+                <t t-out="object.create_uid.partner_id.name"/> has issued a new audio / visual request and needs your approval.<br/>
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Event Date: <t t-out="object.event_date"/> </li>
+                        <li>Start Time: <t t-esc="object.get_start_time_str()"/></li>
+                        <li>End Time: <t t-esc="object.get_end_time_str()"/> </li>
+                        <li>Location: <t t-out="object.location_id.complete_name"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1868&model=isy.audio.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="alr_approved" model="mail.template">
+            <field name="name">Audio / Visual Request Approved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} audio / visual request approved</field>
+            <field name="email_to">{{object.get_emails_list('alr_approved')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_audio_request"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear <t t-out="object.assign_person.name"/>,<br/><br/>
+                <t t-out="object.approver_id.name"/> has approved: <br/>
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Event Date: <t t-out="object.event_date"/> </li>
+                        <li>Start Time: <t t-esc="object.get_start_time_str()"/></li>
+                        <li>End Time: <t t-esc="object.get_end_time_str()"/> </li>
+                        <li>Location: <t t-out="object.location_id.complete_name"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1868&model=isy.audio.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="alr_done" model="mail.template">
+            <field name="name">Audio / Visual Request Resolved</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} audio / visual request resolved</field>
+            <field name="email_to">{{object.create_uid.partner_id.email}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_audio_request"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+
+                <t t-out="object.name"/> has resolved: <br/>
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Event Date: <t t-out="object.event_date"/> </li>
+                        <li>Start Time: <t t-esc="object.get_start_time_str()"/></li>
+                        <li>End Time: <t t-esc="object.get_end_time_str()"/> </li>
+                        <li>Location: <t t-out="object.location_id.complete_name"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1868&model=isy.audio.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="alr_cancelled" model="mail.template">
+            <field name="name">Audio / Visual Request Cancelled</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} audio / visual request cancelled</field>
+            <field name="email_to">{{object.get_emails_list('alr_cancelled')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_audio_request"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear <t t-out="object.create_uid.partner_id.name"/>,<br/><br/>
+                Your request has been cancelled. <br/>
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Event Date: <t t-out="object.event_date"/> </li>
+                        <li>Start Time: <t t-esc="object.get_start_time_str()"/></li>
+                        <li>End Time: <t t-esc="object.get_end_time_str()"/> </li>
+                        <li>Location: <t t-out="object.location_id.complete_name"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1868&model=isy.audio.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+        <record id="alr_reject" model="mail.template">
+            <field name="name">Audio / Visual Request Rejected</field>
+            <field name="email_from">odooadmin@isyedu.org</field>
+            <field name="subject">{{object.name}} - {{object.create_uid.partner_id.name}} audio / visual request rejected</field>
+            <field name="email_to">{{object.get_emails_list('alr_cancelled')}}</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_audio_request"/>
+            <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                Dear <t t-out="object.create_uid.partner_id.name"/>,<br/><br/>
+                Your request has been rejected. <br/>
+                    <ul>
+                        <li>Request By: <t t-out="object.create_uid.partner_id.name"/> </li>
+                        <li>Event Date: <t t-out="object.event_date"/> </li>
+                        <li>Start Time: <t t-esc="object.get_start_time_str()"/></li>
+                        <li>End Time: <t t-esc="object.get_end_time_str()"/> </li>
+                        <li>Location: <t t-out="object.location_id.complete_name"/> </li>
+                    </ul>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1868&model=isy.audio.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+        </record>
+
+    </data>
+</odoo>

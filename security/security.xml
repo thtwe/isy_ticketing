@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.module.category" id="module_category_maintenance_request">
+        <field name="name">Facility Requests</field>
+        <field name="description">Helps you handle your maintenance requests</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <record model="ir.module.category" id="module_category_technology_request">
+        <field name="name">Technology Requests</field>
+        <field name="description">Helps you handle your technology requests</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <record model="ir.module.category" id="module_category_transportation_request">
+        <field name="name">Transportation Requests</field>
+        <field name="description">Helps you handle your transportation requests</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <record model="ir.module.category" id="module_category_schedule_request">
+        <field name="name">Schedule Requests</field>
+        <field name="description">Helps you handle your schedule requests</field>
+        <field name="sequence">100</field>
+    </record>
+    <!-- Audio Visual Group Category-->
+    <record model="ir.module.category" id="module_category_audio_request">
+        <field name="name">Audio Visual Requests</field>
+        <field name="description">Helps you handle your audio/visual requests</field>
+        <field name="sequence">100</field>
+    </record>
+    <!--End of Audio Visual Group Category-->
+
+    <data noupdate="0">
+        <record id="group_mr_requestor" model="res.groups">
+            <field name="name">Requestor</field>
+            <field name="category_id" ref="isy_ticketing.module_category_maintenance_request"/>
+        </record>
+        <record id="group_mr_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="isy_ticketing.module_category_maintenance_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_mr_requestor'))]"/>
+        </record>
+        <record id="group_mr_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="isy_ticketing.module_category_maintenance_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_mr_user'))]"/>
+        </record>
+
+        <record id="group_tyr_requestor" model="res.groups">
+            <field name="name">Requestor</field>
+            <field name="category_id" ref="isy_ticketing.module_category_technology_request"/>
+        </record>
+        <record id="group_tyr_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="isy_ticketing.module_category_technology_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_tyr_requestor'))]"/>
+        </record>
+        <record id="group_tyr_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="isy_ticketing.module_category_technology_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_tyr_user'))]"/>
+        </record>
+
+        <record id="group_tnr_requestor" model="res.groups">
+            <field name="name">Requestor</field>
+            <field name="category_id" ref="isy_ticketing.module_category_transportation_request"/>
+        </record>
+        <record id="group_tnr_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="isy_ticketing.module_category_transportation_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_tnr_requestor'))]"/>
+        </record>
+        <record id="group_tnr_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="isy_ticketing.module_category_transportation_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_tnr_user'))]"/>
+        </record>
+
+        <record id="group_ser_requestor" model="res.groups">
+            <field name="name">Requestor</field>
+            <field name="category_id" ref="isy_ticketing.module_category_schedule_request"/>
+        </record>
+        <record id="group_ser_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="isy_ticketing.module_category_schedule_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_ser_requestor'))]"/>
+        </record>
+        <record id="group_ser_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="isy_ticketing.module_category_schedule_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_ser_user'))]"/>
+        </record>
+
+        <!-- Audio Visual Resquest Systems User Groups-->
+        <record id="group_alr_requestor" model="res.groups">
+            <field name="name">Requestor</field>
+            <field name="category_id" ref="isy_ticketing.module_category_audio_request"/>
+        </record>
+        <record id="group_alr_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="isy_ticketing.module_category_audio_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_alr_requestor'))]"/>
+        </record>
+        <record id="group_alr_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="isy_ticketing.module_category_audio_request"/>
+            <field name="implied_ids" eval="[(4, ref('isy_ticketing.group_alr_user'))]"/>
+        </record>
+        <!-- End of Audio Visual Request Systems User Groups-->
+
+        <record id="base.res_partner_portal_public_rule" model="ir.rule">
+            <field name="domain_force">[('id', '!=',-1)]</field>
+        </record>
+
+        <record model="ir.rule" id="isy_ticketing.isy_ticketing_requests_rule">
+            <field name="name">Only Portal User see own records.</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <!-- <field name="domain_force">['|','|','|',('message_partner_ids','in',[user.partner_id.id]),('create_uid', 'child_of', user.id),('user_ids', 'in', [user.id]), ('driver_id','=',user.id)]</field> -->
+            <field name="domain_force">['|','|','|',('message_partner_ids','in',[user.partner_id.id]),('create_uid', '=', user.id),('user_ids', 'in', [user.id]), ('driver_id','=',user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal')),(4, ref('isy_ticketing.group_mr_requestor')),(4, ref('isy_ticketing.group_tnr_requestor')),(4, ref('isy_ticketing.group_ser_requestor'))]"/>
+        </record>
+
+        <record model="ir.rule" id="isy_ticketing.isy_ticketing_requests_rule_user">
+            <field name="name">Only internal User see own records.</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="domain_force">[('id', '!=', -1)]</field>
+            <field name="groups" eval="[(4, ref('isy_ticketing.group_mr_user')),(4, ref('isy_ticketing.group_tnr_user')),(4, ref('isy_ticketing.group_ser_user'))]"/>
+        </record>
+
+        <record model="ir.rule" id="isy_ticketing.isy_technology_request_rule">
+            <field name="name">Only Technology Portal User see own records.</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
+            <field name="domain_force">['|',('request_person_email', '=', user.login), ('message_partner_ids', 'in', [user.partner_id.id])]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal')),(4, ref('isy_ticketing.group_tyr_requestor'))]"/>
+        </record>
+
+        <record model="ir.rule" id="isy_ticketing.isy_technology_request_rule_manager_user">
+            <field name="name">Only Technology Portal User see own records.</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
+            <field name="domain_force">[('id', '!=',-1)]</field>
+            <field name="groups" eval="[(4, ref('isy_ticketing.group_tyr_user')),(4, ref('isy_ticketing.group_tyr_manager'))]"/>
+        </record>
+
+        <!-- Audio / Visual Requests Records rules-->
+        <record model="ir.rule" id="isy_ticketing.isy_audio_request_rule">
+            <field name="name">Only Techology Portal User see own audio reqest records.</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_audio_request"/>
+            <field name="domain_force">['|',('request_person_email', '=', user.login), ('message_partner_ids', 'in', [user.partner_id.id])]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal')),(4, ref('isy_ticketing.group_alr_requestor'))]"/>
+        </record>
+
+        <record model="ir.rule" id="isy_ticketing.isy_audio_request_rule_manager_user">
+            <field name="name">Only Audio Visual User see own records.</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_audio_request"/>
+            <field name="domain_force">[('id', '!=',-1)]</field>
+            <field name="groups" eval="[(4, ref('isy_ticketing.group_alr_user')),(4, ref('isy_ticketing.group_alr_manager'))]"/>
+        </record>
+
+        <!-- override base rule -->
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'base'), ('name', '=', 'res_partner_portal_public_rule')]"/>
+            </function>
+            <value eval="{'noupdate': False}"/>
+        </function>
+
+        <record model="ir.rule" id="base.res_partner_portal_public_rule">
+            <field name="name">res_partner: portal/public: read access on my commercial partner</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="domain_force">[('id', 'child_of', user.commercial_partner_id.id)]</field>
+            <field name="groups" eval="[(3, ref('base.group_portal'))]"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+            <field name="perm_write" eval="False"/>
+        </record>
+
+        <function name="write" model="ir.model.data">
+            <function name="search" model="ir.model.data">
+                <value eval="[('module', '=', 'base'), ('name', '=', 'res_partner_portal_public_rule')]"/>
+            </function>
+            <value eval="{'noupdate': True}"/>
+        </function>
+    </data>
+</odoo>

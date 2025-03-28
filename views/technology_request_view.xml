@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="isy_technology_request_tree">
+            <field name="name">isy_technology_request tree</field>
+            <field name="model">isy.technology.request</field>
+            <field name="arch" type="xml">
+                <tree default_order='name desc'>
+                    <field name="name"/>
+                    <field name="subject"/>
+                    <field name="assign_person"/>
+                    <field name="request_person"/>
+                    <field name="request_person_email"/>
+                    <field name="assign_date"/>
+                    <field name="resolved_date"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_technology_request_form">
+            <field name="name">isy_technology_request form</field>
+            <field name="model">isy.technology.request</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+
+                        <button string="Approve" groups="isy_ticketing.group_tyr_manager" type="object" class="oe_highlight" name="approve_request" invisible="state != 'request_for_approval'"/>
+                        <button string="Reject" groups="isy_ticketing.group_tyr_manager" type="object" class="oe_highlight" name="reject_request" invisible="state != 'request_for_approval'"/>
+                        <button string="Request For Approval" groups="isy_ticketing.group_tyr_user" type="object" class="oe_highlight" name="request_for_approval" invisible="state not in ('draft', 'progress')"/>
+                        <button string="Progress" type="object" class="oe_highlight" name="progress_request" invisible="state not in ('draft','approved')"/>
+                        <button string="Done" type="object" class="oe_highlight" name="done_request" invisible="state != 'progress'"/>
+                        <button string="Cancel" type="object" class="oe_highlight" name="request_cancelled" invisible="state not in ('draft','request_for_approval','apporved','progress')"/>
+                        <button string="Re-Open" type="object" class="oe_highlight" name="reopen_request" invisible="state not in ('done','rejected')"/>
+
+                        <field name="state" widget="statusbar" statusbar_visible="draft,request_for_approval,approved,rejected,progress,done,cancelled"/>
+
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button
+                                class="oe_stat_button"
+                                name="%(isy_ticketing.act_isy_ticketing_2_purchase_order)d"
+                                type="action"
+                                groups="purchase.group_purchase_user"
+                                string="Purchase Orders"
+                                context="{'isy_ticketing_ref':name}"
+                                invisible="key_type != 'technology' or 'state' != 'progress'"
+                                icon="fa-opencart">
+                                <!-- <field string="Purchases" name="purchase_order_count" widget="statinfo"/> -->
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <h3>
+                                <field name="name" readonly="1"/>
+                            </h3>
+                        </div>
+                        <group>
+                            <field name="subject" required='1' readonly="from_email == True or state == 'done'"/>
+                            <field name="body" required='1' readonly="from_email == True or state == 'done'"/>
+                            <field name="location_id" required='1'/>
+                        </group>
+                     
+                        <group>
+                            <group>
+                                <field name="parent_id" readonly="1"/>
+                                <field name="assign_date"/>
+                                <field name="request_person_email" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="assign_person" readonly="state not in ('approved')"/>
+                                <field name="request_person" readonly="1"/>
+                                <field name="resolved_date" readonly="1"/>
+                                <field name="key_type" invisible="1"/>
+                                <field name="from_email" invisible="1"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Note">
+                                <field name="special_note" readonly="state == 'done'" placeholder="Special note which translate request from body by responsible person"/>
+                            </page>
+                            <page string="Resolution Description" invisible="state not in ('progress','done')" readonly="state != 'progress'">
+                                <field name="resolution_description" placeholder="Resolution Description" readonly="state != 'progress'"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="menu_isy_technology_request_action">
+            <field name="name">Technology Requests</field>
+            <field name="res_model">isy.technology.request</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+
+        <menuitem
+            name="Technology Requests"
+            id="isy_ticketing.menu_technology_request"
+            parent="isy_ticketing.menu_requests"
+            action="isy_ticketing.menu_isy_technology_request_action"
+            sequence="2"
+            groups="isy_ticketing.group_tyr_requestor,isy_ticketing.group_tyr_user"/>
+    </data>
+</odoo>

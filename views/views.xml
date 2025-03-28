@@ -1,0 +1,922 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="act_isy_ticketing_2_purchase_order" model="ir.actions.act_window">
+            <field name="name">RFQs and Purchases</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">tree,form,graph</field>
+            <field name="context">{'search_default_isy_ticketing_ref': context.get('isy_ticketing_ref',False),'default_isy_ticketing_ref': context.get('isy_ticketing_ref',False)}</field>
+            <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    This vendor has no purchase order. Create a new RfQ
+                </p>
+                <p>
+                    The request for quotation is the first step of the purchases flow. Once converted into a purchase order, you will be able to control the receipt of the products and the vendor bill.
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="res_user_form_view_isy_ticketing">
+            <field name="name">res.users.form</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <!-- <xpath expr="//page[@name='access_rights']" position="inside"> -->
+                <xpath expr="//page[@name='access_rights']/group[1]" position="after">
+                        <group>
+                                <!-- Portal Requestor -->
+                                <field name="portal_maintenance_request"/>
+                                <field name="portal_technology_request"/>
+                                <field name="portal_transportation_request"/>
+                                <field name="portal_schedule_request"/>
+                                <field name="portal_audio_request"/>
+                                <!--- Portal User -->
+                                <field name="portal_maintenance_request_user"/>
+                                <field name="portal_technology_request_user"/>
+                                <field name="portal_transportation_request_user"/>
+                                <field name="portal_transportation_request_driver"/>
+                                <field name="portal_audio_request_user"/>
+                        </group>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- inherit -->
+        <record id="discuss_channel_view_form_inherit" model="ir.ui.view">
+            <field name="name">discuss.channel.form.inherit</field>
+            <field name="model">discuss.channel</field>
+            <field name="priority" eval="10"/>
+            <field name="inherit_id" ref="mail.discuss_channel_view_form"/>
+            <field name="arch" type="xml">
+                <field name="description" position="before">
+                    <field name="key_type"/>
+                </field>
+            </field>
+        </record>
+
+        <!-- end inherit -->
+        <!-- explicit list view definition -->
+        <record id="isy_ticketing_list_search" model="ir.ui.view">
+            <field name="name">isy_ticketing list</field>
+            <field name="model">isy.ticketing.requests</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <search string="Search Groups">
+                    <field name="name"/>
+                    <field name="state"/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="isy_ticketing_list">
+            <field name="name">isy_ticketing list</field>
+            <field name="model">isy.ticketing.requests</field>
+            <field name="arch" type="xml">
+                <tree default_order='name desc'>
+                    <field name="name"/>
+                    <field name="display_stock_building"/>
+                    <field name="request_type_id"/>
+                    <field name="create_date" string="Opened"/>
+                    <field name="due_date" string="Due"/>
+                    <field name="user_ids" widget="many2many_tags"/>
+                    <field name="resolved_date"/>
+                    <field name="resolve_user_id"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="fleet_vehicle_inherit_form_view">
+            <field name="name">fleet.vehicle.form.inherit.view</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+            <field name="arch" type="xml">
+                <field name="car_value" position="after">
+                    <field name="check_availability" invisible="0"/>
+                    <field name="reserved_time" invisible="0">
+                        <tree editable='bottom'>
+                            <field name='user'/>
+                            <field name='date_from'/>
+                            <field name='date_to'/>
+                        </tree>
+                    </field>
+                </field>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_ticketing_calendar">
+            <field name="name">isy_ticketing calendar</field>
+            <field name="model">isy.ticketing.requests</field>
+            <field name="arch" type="xml">
+                <calendar color="name" date_start="date_from" date_stop="date_to" string="Transportation">
+                    <field name="name"/>
+                    <field name="fleet"/>
+                    <field name="create_uid"/>
+                    <field name="pick_up_location"/>
+                    <field name="dropoff_location"/>
+                </calendar>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_ticketing_form">
+            <field name="name">isy_ticketing form</field>
+            <field name="model">isy.ticketing.requests</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button string="Confirm" type="object" class="oe_highlight" name="confirm_process" invisible="key_type != 'maintenance' or state != 'waitingconfirmation'" groups="base.group_user"/>cd 
+                        <button string="Approve" type="object" class="oe_highlight" name="approve_process" invisible="state != 'waitingforapproval'"/>
+                        <button string="Resolve" type="object" class="oe_highlight" name="resolve_process" invisible="state != 'pendingresolution'"/>
+                        <button string="Cancel" type="object" name="cancel_process" class="oe_highlight" invisible="state not in ('waitingconfirmation','pendingresolution','waitingforapproval','final_upcoming')"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,waitingconfirmation,waitingforapproval,pendingresolution,resolved,cancelled"/>
+
+                    </header>
+                    <sheet>
+                        <field name="key_type" invisible="1"/>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="allocate_driver" type="object" invisible="key_type != 'transportation' or state != 'pendingresolution'" class="oe_stat_button" icon="fa-car" string="Allocate Driver"/>
+                            <button
+                                class="oe_stat_button"
+                                name="%(isy_ticketing.act_isy_ticketing_2_purchase_order)d"
+                                type="action"
+                                groups="purchase.group_purchase_user"
+                                string="Purchase Orders"
+                                context="{'isy_ticketing_ref':name}"
+                                invisible="key_type not in ('maintenance', 'transportation') or state != 'pendingresolution'"
+                                icon="fa-opencart">
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <h3>
+                                <field name="name"/>
+                            </h3>
+                        </div>
+                        <group cols="2">
+                            <field name="request_type_id" domain="[('key_type','=',key_type)]" required="1" readonly="state != 'draft'"/>
+                            <field name="parent_id" readonly="1" invisible="key_type not in ['maintenance', 'technology']"/>
+                            <field name="is_request" invisible="1"/>
+                            <field name="request" invisible="is_request == False" required="is_request == True" readonly="state != 'draft'"/>
+                            <field name="location_address" readonly="1" invisible="key_type == 'transportation'"/>
+                            <field name="is_old_location" invisible="1"/>
+                            <field name="stock_building_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False"/>
+                            <field name="stock_location_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False"/>
+                            <field name="due_date" readonly="state != 'draft'" invisible="key_type == 'schedule'" required="key_type != 'schedule'"/>
+                            <field name="user_ids" widget="many2many_tags" readonly="True" invisible="key_type == 'schedule'" options="{'no_create': True}"/>
+                            <field name="approver_ids" invisible="key_type != 'maintenance'" options="{'no_create': True}"/>
+                            <field name="before_starttime" required="1" readonly="state != 'waitingforapproval'" invisible="key_type != 'maintenance'" string="Setup Time"/>
+                        </group>
+                        <notebook>
+                                <page string="Note" invisible="key_type == 'schedule'">
+                                    <field name="description" placeholder="Note here" readonly="state != 'draft' and key_type not in ('maintenance')"/>
+                                </page>
+                                <page string="Cancellation Reason">
+                                    <field name="cancellation_reason" placeholder="Cancellation Reason" invisible="key_type not in ('maintenance','transportation','schedule')" readonly="state in ('cancelled','resolved')"/>
+                                </page>
+                                <page string="Resolution Description" invisible="state != 'resolved'">
+                                    <field name="resolution_description" readonly="1" placeholder="Resolution Description"/>
+                                </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_ticketing_list_ser">
+            <field name="name">isy_ticketing list</field>
+            <field name="model">isy.ticketing.requests</field>
+            <field name="arch" type="xml">
+                <tree default_order='name desc'>
+                    <field name="name"/>
+                    <field name="display_stock_building"/>
+                    <field name="display_stock_location" string="Resources/Locations"/>
+                    <field name="request_type_id"/>
+                    <field name="create_date" string="Opened"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_ticketing_form_transportaion">
+            <field name="name">isy_ticketing form transportaion</field>
+            <field name="model">isy.ticketing.requests</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button string="Request to Approve" type="object" class="oe_highlight" name="approve_request" invisible="state != 'waitingfordriverassign'"/>
+                        <button string="Approve" type="object" class="oe_highlight" name="approve_process" invisible="state != 'waitingforapproval'"/>
+                        <button string="Resolve" type="object" class="oe_highlight" name="resolve_process" invisible="state != 'pendingresolution'"/>
+                        <button string="Cancel" type="object" name="cancel_process" class="oe_highlight" invisible="state not in ('waitingfordriverassign','pendingresolution','waitingforapproval','final_upcoming')"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,waitingforapproval,pendingresolution,resolved,cancelled"/>
+                    </header>
+                    <sheet>
+                        <field name="key_type" invisible="1"/>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="allocate_driver" type="object" invisible="state not in ('waitingfordriverassign','waitingforapproval','pendingresolution')" class="oe_stat_button" icon="fa-car" string="Allocate Driver"/>
+                            <button
+                                class="oe_stat_button"
+                                name="%(isy_ticketing.act_isy_ticketing_2_purchase_order)d"
+                                type="action"
+                                groups="purchase.group_purchase_user"
+                                string="Purchase Orders"
+                                context="{'isy_ticketing_ref':name}"
+                                invisible="key_type not in ('maintenance', 'transportation') or state != 'pendingresolution'"
+                                icon="fa-opencart">
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <h3>
+                                <field name="name"/>
+                            </h3>
+                        </div>
+                        <group cols="2">
+                            <field name="request_type_id" domain="[('key_type','=',key_type)]" required="1" readonly="state != 'draft'"/>
+                            <field name="driver_id" readonly="1"/>
+                            <field name="due_date" readonly="state != 'draft'" required="1"/>
+                            <field name="user_ids" widget="many2many_tags" readonly="state != 'waitingforapproval'" options="{'no_create': True}"/>
+                            <field name="schedule_start_date" required="1" readonly="state == 'cancelled'" string="Date From"/>
+                             <field name="all_day" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type != 'schedule'"/>
+                            <label for="start_time" string="Start Time"></label>
+                            <div><field
+                                name="start_time"
+                                widget="float_time"
+                                options="{'round_off': True}"
+                                required="1" readonly="state == 'cancelled'" invisible="all_day == True" class="oe_inline"/><span style='color:#9e9ead' class="oe_edit_only"> [ HH:MM:SS and 24 hrs format ]</span></div>
+                            
+                            <field name="schedule_end_date" required="1" readonly="state == 'cancelled'" invisible="key_type != 'transportation'" string="Date To"/>
+                            <label for="end_time" string='End Time'></label>
+                            <div><field
+                                name="end_time"
+                                widget="float_time"
+                                options="{'round_off': True}"
+                                required="1" readonly="state == 'cancelled'" invisible="all_day == True" class="oe_inline"/><span style='color:#9e9ead' class="oe_edit_only"> [ HH:MM:SS and 24 hrs format ]</span></div>
+
+                            <field name="date_from" invisible="1"/>
+                            <field name="date_to" invisible="1"/>
+                            <field name="date_from_toshow" invisible="1"/>
+                            <field name="date_to_toshow" invisible="1"/>
+
+                            <field name="pick_up_location" readonly="state != 'draft'" required="1"/>
+                            <field name="dropoff_location" readonly="state != 'draft'" required="1"/>
+                            <field name="pick_up_at_dropoff_location" readonly="state != 'draft'" required="1"/>
+                            <field name="is_driver_allocated" invisible="1"/>
+                            <field name="no_of_passengers" required="1" readonly="state == 'resolved'"/>
+                            <field name="fleet" readonly="state != 'waitingfordriverassign'" domain="[('check_availability','=',True),('seats','>=',no_of_passengers)]" options="{'no_create': True}" invisible="key_type != 'transportation'"/>
+                            <field name="rental_vehicle" readonly="1"/>
+                        </group>
+                        <notebook>
+                                <page string="Note">
+                                    <field name="description" placeholder="Note here" readonly="state != 'draft'"/>
+                                </page>
+                                <page string="Cancellation Reason">
+                                    <field name="cancellation_reason" placeholder="Cancellation Reason" readonly="state in ('cancelled','resolved')"/>
+                                </page>
+                                <page string="Resolution Description" invisible="state != 'resolved'">
+                                    <field name="resolution_description" readonly="1" placeholder="Resolution Description"/>
+                                </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_ticketing_form_ser">
+            <field name="name">isy_ticketing form</field>
+            <field name="model">isy.ticketing.requests</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button
+                            string="Approve"
+                            groups="isy_ticketing.group_mr_manager, isy_ticketing.group_tnr_manager, isy_ticketing.group_ser_manager, isy_ticketing.group_ser_user,base.group_portal"
+                            type="object"
+                            class="oe_highlight"
+                            name="approve_process"
+                            invisible="state != 'waitingforapproval'"/>
+                        <button string="Resolve" type="object" class="oe_highlight" name="resolve_process" invisible="state != 'pendingresolution'"/>
+                        <button string="Cancel" type="object" name="cancel_process" class="oe_highlight" invisible="state not in ('waitingforapproval','final_upcoming')"/>
+
+                        <field name="state" widget="statusbar" statusbar_visible="draft,waitingforapproval,final_upcoming,final_completed,cancelled"/>
+
+                    </header>
+                    <sheet>
+                        <field name="key_type" invisible="1"/>
+                        <div class="oe_title">
+                            <h3>
+                                <field name="name"/>
+                            </h3>
+                        </div>
+                        <group cols="2">
+                            <field name="request_type_id" domain="[('key_type','=',key_type)]" required="1" readonly="state not in ['draft', 'waitingforapproval']"/>
+                            <field name="event_name" required="1" invisible="key_type != 'schedule'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                            <field name="location_address" readonly="1" invisible="key_type == 'transportation'"/>
+                            <field name="is_request" invisible="1"/>
+                            <field name="request" invisible="is_request == False" required="is_request == True" readonly="state not in ['draft', 'waitingforapproval']"/>
+                            <field name="building_id"  options="{'no_create': True}" readonly="state not in ['draft', 'waitingforapproval']" required="key_type != 'transportation' and is_old_location == True" invisible="key_type == 'transportation' or is_old_location == False"/>
+                            <field name="location_id"  options="{'no_create': True}" readonly="state not in ['draft', 'waitingforapproval']" required="key_type != 'transportation' and is_old_location == True" invisible="key_type == 'transportation' or is_old_location == False"/>
+                            <field name="stock_building_id"  options="{'no_create': True}" required="key_type != 'transportation' and is_old_location == False" invisible="key_type == 'transportation' or is_old_location == True"/>
+                            <field name="stock_location_id" options="{'no_create': True}"  required="1" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type == 'transportation' or is_old_location == True"/>
+                            <field name="is_old_location" invisible="1" />
+                            <field name="all_day" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type != 'schedule'"/>
+                            <field name="schedule_start_date" required="1" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type != 'schedule'"/>
+                            <label for="start_time" string="Start Time"></label>
+                            <div><field name="start_time" widget="float_time" options="{'round_off': True}" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type not in ('schedule') or all_day == True" class="oe_inline"/></div>
+                            <label for="end_time" string="End Time"></label>
+                            <div><field name="end_time" widget="float_time" options="{'round_off': True}" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type not in ('schedule') or all_day == True" class="oe_inline"/></div>
+                            <field name="repeat_type" invisible="key_type != 'schedule'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                        </group>
+
+                        <group>
+                            <group>
+                                <field name="day_mon" invisible="repeat_type != 'weekly'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                                <field name="day_tue" invisible="repeat_type != 'weekly'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                                <field name="day_wed" invisible="repeat_type != 'weekly'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                                <field name="day_thu" invisible="repeat_type != 'weekly'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                            </group>
+                            <group>
+                                <field name="day_fri" invisible="repeat_type != 'weekly'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                                <field name="day_sat" invisible="repeat_type != 'weekly'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                                <field name="day_sun" invisible="repeat_type != 'weekly'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                            </group>
+                        </group>
+
+                        <group col="2">
+                            <field name="schedule_end_date" invisible="repeat_type == 'never'" required="repeat_type != 'never'" readonly="state not in ['draft', 'waitingforapproval']"/>
+                            <field name="groups_sponsoring_activity" readonly="state not in ['draft', 'waitingforapproval']"/>
+                        </group>
+                        <group col="4">
+                            <field name="sponsor_1" readonly="state not in ['draft', 'waitingforapproval']"/>
+                            <field name="sponsor_2" readonly="state not in ['draft', 'waitingforapproval']"/>
+                        </group>
+                            <notebook>
+                                <page string="Note" invisible='1'>
+                                    <field name="description" placeholder="Note here" readonly="state not in ['draft', 'waitingforapproval']"/>
+                                </page>
+                                <page string="Resolution Description" invisible="state != 'resolved'">
+                                    <field name="resolution_description" readonly="1" placeholder="Resolution Description"/>
+                                </page>
+                                <page string="Additional Requests" readonly="state not in ['draft', 'waitingforapproval']">
+                                    <p style='color:#676777'>You can request additional <i>Facility Requests and Technology Requests</i> here.</p>
+                                    <field name="requests_details" readonly="state not in ['draft', 'waitingforapproval']">
+                                        <tree editable="bottom">
+                                            <field name="name" required="1"/>
+                                            <field name="qty"/>
+                                            <field name="details_request_type" required="1"/>
+                                        </tree>
+                                    </field>
+                                </page>
+                                <page string="Cancellation Reason">
+                                    <field name="cancellation_reason" placeholder="Cancellation Reason" invisible="key_type not in ('maintenance','transportation','schedule')" readonly="state in ('cancelled','resolved')"/>
+                                </page>
+                            </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="isy_ticketing_form_user_ids_readonly" model="ir.ui.view">
+            <field name="name">isy.ticketing.form.readonly</field>
+            <field name="model">isy.ticketing.requests</field>
+            <field name="inherit_id" ref="isy_ticketing.isy_ticketing_form"/>
+            <field name="arch" type="xml">
+                <field name='user_ids' position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </field>
+                <xpath expr="//field[@name='user_ids']" position="attributes">
+                    <attribute name="groups">base.group_portal</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Building Start -->
+        <record model="ir.ui.view" id="isy_building_list">
+            <field name="name">isy_building list</field>
+            <field name="model">isy.building</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" string="Buildings"/>
+                    <field name="isy_phone"/>
+                    <field name="isy_type"/>
+                    <field name="isy_year_built"/>
+                    <field name="isy_area"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_building_form">
+            <field name="name">isy_building form</field>
+            <field name="model">isy.building</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                                <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                            </button>
+                        </div>
+                        <group>
+                            <field name="name" string="Buildings"/>
+                            <field name="isy_address"/>
+                            <field name="isy_phone"/>
+                            <field name="isy_type"/>
+                            <field name="isy_year_built"/>
+                            <field name="isy_area"/>
+                            <field name="isy_no_of_units"/>
+                            <field name="isy_emergency_info"/>
+                            <field name="isy_additional_comments"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <!-- Building End -->
+
+        <!-- Resources Locations Start -->
+        <record model="ir.ui.view" id="isy_resources_locations_list">
+            <field name="name">isy_resources_locations list</field>
+            <field name="model">isy.resources.locations</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="isy_parent_resource_id"/>
+                    <field name="building_id"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_resources_locations_form">
+            <field name="name">isy_resources_locations form</field>
+            <field name="model">isy.resources.locations</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                                <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                            </button>
+                        </div>
+                        <group>
+                            <field name="name"/>
+                            <field name="building_id"/>
+                            <field name="is_location"/>
+                            <field name="address" invisible="is_location != True"/>
+                            <field name="isy_parent_resource_id" domain="[('building_id','=',building_id)]"/>
+                        </group>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+        <!-- Resources Locations End -->
+
+        <!-- Request Type Start -->
+        <record model="ir.ui.view" id="isy_request_type_list">
+            <field name="name">isy_request_type list</field>
+            <field name="model">isy.request.type</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="key_type"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_request_type_form">
+            <field name="name">isy_request_type form</field>
+            <field name="model">isy.request.type</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                                <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                            </button>
+                        </div>
+                        <group>
+                            <field name="name"/>
+                            <field name="key_type"/>
+                            <field name="is_request"/>
+                            <field name="default_request"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- Request Type End -->
+
+        <!-- Technician Needed Start -->
+        <record model="ir.ui.view" id="isy_technician_needed_list">
+            <field name="name">isy_technician_needed list</field>
+            <field name="model">isy.technician.needed</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_technician_needed_form">
+            <field name="name">isy_technician_needed form</field>
+            <field name="model">isy.technician.needed</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                                <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                            </button>
+                        </div>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- Technician Needed End -->
+
+        <record model="ir.ui.view" id="isy_resource_location_reserved_list">
+            <field name="name">isy_resources_locations_reserved list</field>
+            <field name="model">isy.resources.locations.reserved</field>
+            <field name="arch" type="xml">
+                <tree create="false">
+                    <field name="reserved_obj"/>
+                    <field name="request_id"/>
+                    <field name="date_from_toshow" />
+                    <field name="date_to_toshow" />
+                    <field name="date_from" invisible='1'/>
+                    <field name="date_to" invisible='1'/>
+                    <field name="user"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="isy_resource_location_reserved_form">
+            <field name="name">isy_resources_locations_reserved form</field>
+            <field name="model">isy.resources.locations.reserved</field>
+            <field name="arch" type="xml">
+                <form create="false" edit="false">
+                    <sheet>
+                        <group>
+                            <field name="reserved_obj" required="1" readonly="1"/>
+                            <field name="request_id" required="1" readonly="1"/>
+                            <field name="date_from_toshow" />
+                            <field name="date_to_toshow" />
+                            <field name="date_from" required="1" invisible="1"/>
+                            <field name="date_to" required="1" invisible="1"/>
+                            <field name="user" required="1" readonly="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- <record model="ir.ui.view" id="isy_resource_location_reserved_calendar">
+            <field name="name">isy_resources_locations_reserved calendar</field>
+            <field name="model">isy.resources.locations.reserved</field>
+            <field name="arch" type="xml">
+                <calendar color="reserved_obj" date_start="date_from_toshow" date_stop="date_to_toshow" string="Schedule Locations" quick_add="False" event_open_popup="false">
+                    <field name="reserved_obj"/>
+                    <field name="request_id"/>
+                    <field name="date_from_toshow"/>
+                    <field name="date_to_toshow"/>
+                    <field name="user"/>
+                </calendar>
+            </field>
+        </record> -->
+
+        <record model="ir.ui.view" id="isy_resource_location_reserved_calendar">
+            <field name="name">isy_resources_locations_reserved_calendar</field>
+            <field name="model">isy.resources.locations.reserved</field>
+            <field name="arch" type="xml">
+                <calendar 
+                    string="Schedule Locations"
+                    color="reserved_obj.id"
+                    date_start="date_from_toshow"
+                    date_stop="date_to_toshow">
+                    <field name="reserved_obj"/>
+                    <field name="request_id"/>
+                    <field name="date_from_toshow"/>
+                    <field name="date_to_toshow"/>
+                    <field name="user"/>
+                </calendar>
+            </field>
+        </record>
+
+        <!-- actions opening views on models -->
+
+        <record model="ir.actions.act_window" id="menu_maintenance_request_action">
+            <field name="name">Facility Requests</field>
+            <field name="res_model">isy.ticketing.requests</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_key_type': 'maintenance'}</field>
+            <field name="domain">[('key_type','=','maintenance')]</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="menu_planning_request_action">
+            <field name="name">Planning Requets</field>
+            <field name="res_model">isy.ticketing.requests</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_key_type': 'planning'}</field>
+            <field name="domain">[('key_type','=','planning')]</field>
+        </record>
+
+        <record id="menu_schedule_request_action" model="ir.actions.server">
+            <field name="name">Schedule Request</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = model.redirect_schedule_request()
+            </field>
+        </record>
+
+        <record id="menu_stationary_request_action" model="ir.actions.server">
+            <field name="name">Stationary Request</field>
+            <field name="model_id" ref="isy_ticketing.model_isy_ticketing_requests"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = model.redirect_stationary_request()
+            </field>
+        </record>
+        <!-- <record model="ir.actions.act_window" id="menu_schedule_request_action"> <field name="name">Schedule Requests</field> <field name="res_model">isy.ticketing.requests</field> <field name="view_mode">tree,form</field> <field
+        name="context">{'default_key_type': 'schedule'}</field> <field name="domain">[('key_type','=','schedule')]</field> </record> -->
+
+        <record model="ir.actions.act_window" id="menu_technology_request_action">
+            <field name="name">Technology Requets</field>
+            <field name="res_model">isy.ticketing.requests</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'default_key_type': 'technology'}</field>
+            <field name="domain">[('key_type','=','technology')]</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="menu_transportation_request_action">
+            <field name="name">Transportation Requests</field>
+            <field name="res_model">isy.ticketing.requests</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('isy_ticketing_list')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('isy_ticketing_form_transportaion')})]"/>
+            <field name="context">{'default_key_type': 'transportation'}</field>
+            <field name="domain">[('key_type','=','transportation')]</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="menu_isy_resources_locations_reserved_action">
+            <field name="name">Schedule Reserved Lists</field>
+            <field name="res_model">isy.resources.locations.reserved</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="menu_building_action">
+            <field name="name">Buildings</field>
+            <field name="res_model">isy.building</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{}</field>
+            <field name="domain">[]</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="menu_resources_locations_action">
+            <field name="name">Resources/Locations</field>
+            <field name="res_model">isy.resources.locations</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="menu_request_type_action">
+            <field name="name">Request Type Definition</field>
+            <field name="res_model">isy.request.type</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="menu_isy_technician_needed_action">
+            <field name="name">Technician Needed Definition</field>
+            <field name="res_model">isy.technician.needed</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <!-- server action to the one above -->
+        <!-- <record model="ir.actions.server" id="isy_ticketing.action_server"> <field name="name">isy_ticketing server</field> <field name="model_id" ref="model_isy_ticketing_isy_ticketing"/> <field name="state">code</field> <field name="code"> action = {
+        "type": "ir.actions.act_window", "view_mode": "tree,form", "res_model": self._name, } </field> </record> -->
+
+        <record id="action_location_form_ticketing" model="ir.actions.act_window">
+            <field name="name">Locations</field>
+            <field name="res_model">stock.location</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_id" ref="stock.view_location_tree2"/>
+            <field name="search_view_id" ref="stock.view_location_search"/>
+            <field name="context">{'search_default_in_location':1}</field>
+            <field name="domain">[('usage','=','internal')]</field>
+            <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a new location
+            </p><p>
+                Define your locations to reflect your warehouse structure and
+                organization. Odoo is able to manage physical locations
+                (warehouses, shelves, bin, etc), partner locations (customers,
+                vendors) and virtual locations which are the counterpart of
+                the stock operations like the manufacturing orders
+                consumptions, inventories, etc.
+            </p><p>
+                Every stock operation in Odoo moves the products from one
+                location to another one.  For instance, if you receive products
+                from a vendor, Odoo will move products from the Vendor
+                location to the Stock location. Each report can be performed on
+                physical, partner or virtual locations.
+            </p>
+            </field>
+        </record>
+
+        <!-- Top menu item -->
+
+        <menuitem
+            name="Ticketing"
+            id="isy_ticketing.menu_isy_ticketing_root"
+            groups="isy_ticketing.group_ser_requestor,isy_ticketing.group_ser_user,isy_ticketing.group_ser_manager,isy_ticketing.group_tnr_requestor,isy_ticketing.group_mr_requestor,isy_ticketing.group_tyr_requestor,isy_ticketing.group_mr_user,isy_ticketing.group_tyr_user,isy_ticketing.group_tnr_user"
+            web_icon="isy_ticketing,static/description/icon.png"
+            sequence="9"/>
+
+        <!-- menu categories -->
+
+        <menuitem
+            name="Request Type"
+            id="isy_ticketing.menu_requests"
+            parent="isy_ticketing.menu_isy_ticketing_root"
+            groups="isy_ticketing.group_ser_requestor,isy_ticketing.group_ser_user,isy_ticketing.group_ser_manager,isy_ticketing.group_tnr_requestor,isy_ticketing.group_mr_requestor,isy_ticketing.group_tyr_requestor,isy_ticketing.group_mr_user,isy_ticketing.group_tyr_user,isy_ticketing.group_tnr_user"/>
+        <menuitem name="Settings" id="isy_ticketing.menu_settings" parent="isy_ticketing.menu_isy_ticketing_root" groups="isy_ticketing.group_mr_manager,isy_ticketing.group_tyr_manager"/>
+
+        <!-- actions -->
+
+        <menuitem
+            name="Facility Requests"
+            id="isy_ticketing.menu_maintenance_request"
+            parent="isy_ticketing.menu_requests"
+            action="isy_ticketing.menu_maintenance_request_action"
+            sequence="1"
+            groups="isy_ticketing.group_mr_user,isy_ticketing.group_mr_requestor"/>
+
+        <menuitem name="Stationery Requests" id="isy_ticketing.menu_stationary_request" parent="isy_ticketing.menu_requests" action="isy_ticketing.menu_stationary_request_action" sequence="5"/>
+        -->
+
+        <menuitem
+            name="Schedule Requests"
+            id="isy_ticketing.menu_schedule_request"
+            parent="isy_ticketing.menu_requests"
+            action="isy_ticketing.menu_schedule_request_action"
+            sequence="4"
+            groups="isy_ticketing.group_ser_requestor,isy_ticketing.group_ser_user,isy_ticketing.group_ser_manager"/>
+
+        <menuitem
+            name="Schedule Reserved List"
+            id="isy_ticketing.menu_schedule_request_list"
+            parent="isy_ticketing.menu_requests"
+            action="isy_ticketing.menu_isy_resources_locations_reserved_action"
+            sequence="4"
+            groups="isy_ticketing.group_ser_requestor,isy_ticketing.group_ser_user,isy_ticketing.group_ser_manager"/>
+
+        <!-- menu_isy_resources_locations_reserved_action <menuitem name="Technology Requests" id="isy_ticketing.menu_technology_request" parent="isy_ticketing.menu_requests" action="isy_ticketing.menu_technology_request_action" sequence="4"
+        groups="isy_ticketing.group_tyr_user"/> -->
+
+        <menuitem
+            name="Transportation Requests"
+            id="isy_ticketing.menu_transportation_request"
+            parent="isy_ticketing.menu_requests"
+            action="isy_ticketing.menu_transportation_request_action"
+            groups="isy_ticketing.group_tnr_user,isy_ticketing.group_tnr_requestor"
+            sequence="3"/>
+
+        <!-- <menuitem name="Building" id="isy_ticketing.menu_building" parent="isy_ticketing.menu_settings" action="isy_ticketing.menu_building_action"/>
+
+        <menuitem name="Resources\Locations" id="isy_ticketing.menu_resources_locations" parent="isy_ticketing.menu_settings" action="isy_ticketing.menu_resources_locations_action"/> -->
+
+
+        <menuitem name="Resources\Locations" id="isy_ticketing.menu_resources_locations" parent="isy_ticketing.menu_settings" action="isy_ticketing.action_location_form_ticketing" />
+
+        <menuitem name="Request Type Definition" id="isy_ticketing.menu_request_type" parent="isy_ticketing.menu_settings" action="isy_ticketing.menu_request_type_action"/>
+
+        <menuitem name="Technician Needed Definition" id="isy_ticketing.menu_isy_technician_needed" parent="isy_ticketing.menu_settings" action="isy_ticketing.menu_isy_technician_needed_action"/>
+
+        <menuitem id="mail_channel_isy_ticketing_requests" parent="isy_ticketing.menu_settings" sequence="90" name="Channels" action="mail.discuss_channel_action_view"/>
+
+        <record id="website_maintenance_request" model="ir.actions.act_url">
+            <field name="name">Facility Request Portal</field>
+            <field name="type">ir.actions.act_url</field>
+            <field name="target">self</field>
+            <field name="url">/my/home</field>
+        </record>
+
+        <menuitem action="website_maintenance_request" name="Facility Requests Portal" id="website_maintenance_request_menu" groups="base.group_portal" sequence="2"/>
+
+        <!-- <record id="website_stationary_request" model="ir.actions.act_url"> <field name="name">Stationary Request Portal</field> <field name="type">ir.actions.act_url</field> <field name="target">new</field> <field
+        name="url">'http://stationery.isyedu.org/login.php?email=%s' % (self.env.user.login)</field> </record> -->
+
+        <menuitem action="menu_stationary_request_action" name="Stationary Requests Portal" id="website_stationary_request_menu" groups="base.group_portal" sequence="6"/>
+
+        <record id="website_schedule_request" model="ir.actions.act_url">
+            <field name="name">Schedule Request Portal</field>
+            <field name="type">ir.actions.act_url</field>
+            <field name="target">self</field>
+            <field name="url">/my/home</field>
+        </record>
+
+        <menuitem action="website_schedule_request" name="Schedule Requests Portal" id="website_Schedule_request_menu" groups="base.group_portal" sequence="5"/>
+
+        <record id="website_technology_request" model="ir.actions.act_url">
+            <field name="name">Technology Request Portal</field>
+            <field name="type">ir.actions.act_url</field>
+            <field name="target">self</field>
+            <field name="url">/my/home</field>
+        </record>
+
+        <menuitem action="website_technology_request" name="Technology Requests Portal" id="website_Technology_request_menu" groups="base.group_portal" sequence="3"/>
+
+        <record id="website_audio_request" model="ir.actions.act_url">
+            <field name="name">Audio Visual Request Portal</field>
+            <field name="type">ir.actions.act_url</field>
+            <field name="target">self</field>
+            <field name="url">/my/home</field>
+        </record>
+
+        <menuitem action="website_audio_request" name="Audio Visual Requests Portal" id="website_audio_request_menu" groups="base.group_portal" sequence="4"/>
+
+        <record id="website_transportation_request" model="ir.actions.act_url">
+            <field name="name">Transportation Request Portal</field>
+            <field name="type">ir.actions.act_url</field>
+            <field name="target">self</field>
+            <field name="url">/my/home</field>
+        </record>
+
+        <menuitem action="website_transportation_request" name="Transportation Requests Portal" id="website_Transportation_request_menu" groups="base.group_portal" sequence="4"/>
+
+        <menuitem name="Vechicle" id="isy_ticketing.menu_vehicle" parent="isy_ticketing.menu_settings" action="fleet.fleet_vehicle_action"/>
+
+        <menuitem name="Vechicle Model" id="isy_ticketing.menu_vehicle_model" parent="isy_ticketing.menu_settings" action="fleet.fleet_vehicle_model_action"/>
+
+        <record model="ir.ui.view" id="fleet_vehicle_view_form_isy_ticketing_inherit">
+            <field name="name">fleet.vehicle.form</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+            <field name="arch" type="xml">
+                <div name="button_box" position="replace">
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options="{&quot;terminology&quot;: &quot;archive&quot;}"/>
+                        </button>
+                    </div>
+                </div>
+
+                <field name="acquisition_date" position="replace">
+                    <field name="acquisition_date" invisible="1"/>
+                </field>
+
+                <field name="first_contract_date" position="replace">
+                    <field name="first_contract_date" invisible="1"/>
+                </field>
+
+                <field name="car_value" position="replace">
+                    <field name="car_value" invisible="1"/>
+                </field>
+
+                <field name="residual_value" position="replace">
+                    <field name="residual_value" invisible="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="purchase_order_form_isy_ticketing_inherit">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <field name="fiscal_position_id" position="before">
+                    <field name="isy_ticketing_ref" readonly="1"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_purchase_order_filter_isy_ticketing" model="ir.ui.view">
+            <field name="name">request.quotation.select</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="arch" type="xml">
+                <field name="user_id" position="after">
+                    <field name="isy_ticketing_ref"/>
+                </field>
+            </field>
+        </record>
+</odoo>

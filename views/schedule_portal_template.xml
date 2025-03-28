@@ -1,0 +1,99 @@
+<odoo>
+    <data>
+
+        <template id="schedule_requests" name="Portal layout : maintenance menu entries" inherit_id="portal.portal_breadcrumbs" priority="70">
+            <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+                <li t-if="page_name == 'schedule_request' or schedule_request" t-attf-class="breadcrumb-item #{'active ' if not schedule_request else ''}">
+                    <a t-if="schedule_requests" t-attf-href="/my/schedule_requests?{{ keep_query() }}">Schedule Requests</a>
+                    <t t-else="">Schedule Requests</t>
+                </li>
+                <li t-if="schedule_request" class="breadcrumb-item active">
+                    <t t-esc="schedule_request.name"/>
+                </li>
+            </xpath>
+        </template>
+
+        <template id="portal_schedule_requests" name="Schedule Request Portal" inherit_id="portal.portal_my_home" priority="40">
+            <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+                <t t-if="request.env.user.portal_schedule_request or request.env.user.portal_schedule_request_user" t-call="isy_ticketing.portal_docs_entry">
+                    <t t-set="title">Schedule Requests</t>
+                    <t t-set="url" t-value="'/my/schedule_requests'"/>
+                    <t t-set="count" t-value="schedule_requests_count"/>
+                </t>
+            </xpath>
+        </template>
+
+        <template id="portal_my_schedule_requests" name="My Schedule Requests">
+            <t t-call="portal.portal_layout">
+                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+                <t t-call="portal.portal_searchbar">
+                    <t t-set="title">Schedule Requests</t>
+                </t>
+                <hr/>
+                <div class="row">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <a t-attf-href="/web#view_type=form&amp;model=isy.ticketing.requests&amp;&amp;action=isy_ticketing.menu_schedule_request_action    " class="btn btn-info">New Schedule Request</a>
+                        </div>
+                    </div>
+                </div>
+                <hr/>
+                <t t-call="portal.portal_table">
+                    <thead>
+                        <tr class="active">
+                            <th></th>
+                            <th>Ref #</th>
+                            <th>Event Name</th>
+                            <th>Building</th>
+                            <th>Request Type</th>
+                            <th>Opened</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>Start Time</th>
+                            <th>Start EndTime</th>
+                            <th>Repeats</th>
+                            <th>Date Until</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="schedule_requests" t-as="me_req">
+                            <tr>
+                                <td>
+                                    <a class="btn btn-info" t-att-href="'/web#return_label=Website&amp;model=isy.ticketing.requests&amp;id=%s&amp;view_type=form' % (me_req.id)">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.name" t-if="me_req.name"/>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.event_name" t-if="me_req.event_name"/>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.building_id.name" t-if="me_req.building_id"/>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.request_type_id.name" t-if="me_req.request_type_id"/>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.create_uid.name" t-if="me_req.create_uid"/>
+                                </td>
+                                <td class="text-center"><span class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.schedule_start_date"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.start_time"/></td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.end_time"/></td>
+                                <td>
+                                    <t t-esc="me_req.create_uid.name" t-if="me_req.repeat_type"/>
+                                </td>
+                                <td class='d-none d-md-table-cell'><span t-field="me_req.schedule_end_date"/></td>
+
+                            </tr>
+                        </t>
+                    </tbody>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
