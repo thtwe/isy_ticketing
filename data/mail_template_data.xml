@@ -269,24 +269,50 @@
         <!--- Only Send Email to channel by using this template -->
         <record id="new_tyr_received" model="mail.template">
             <field name="name">Technology Request Received ( Email )</field>
-            <field name="body_type">qweb</field>
+            <!-- <field name="body_type">qweb</field> -->
             <field name="body_view_id" ref="new_tyr_received_template"/>
             <field name="email_from">odooadmin@isyedu.org</field>
             <field name="subject">Ref - {{object.name}} [ Technology Request Received ]</field>
             <field name="email_to">{{object.get_emails_list()}}</field>
             <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
             <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    Technology request is received.
+                    <ul>
+                        <li>Reference Ticket Number: <t t-esc="object.name"/></li>
+                        <li>Original Request Subject: <t t-esc="object.subject"/></li>
+                        <li>Original Request Body: <t t-raw="object.body"/></li>
+                        <li>Location: <t t-raw="object.location_id.name"/></li>
+                        <li>Special Note: <t t-esc="object.special_note"/></li>
+                    </ul>
+                    <a t-att-href="object.get_record_url()" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
         </record>
 
         <record id="new_tyr_received_approved" model="mail.template">
             <field name="name">Technology Request Approved ( Email )</field>
-            <field name="body_type">qweb</field>
+            <!-- <field name="body_type">qweb</field> -->
             <field name="body_view_id" ref="new_tyr_received_approved_template"/>
             <field name="email_from">odooadmin@isyedu.org</field>
             <field name="subject">Ref - {{object.name}} [ Technology Request Approved ]</field>
             <field name="email_to">{{object.get_emails_list()}}</field>
             <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
             <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    Technology request is approved.
+                    <ul>
+                        <li>Reference Ticket Number: <t t-esc="object.name"/></li>
+                        <li>Original Request Subject: <t t-esc="object.subject"/></li>
+                        <li>Original Request Body: <t t-raw="object.body"/></li>
+                        <li>Location: <t t-raw="object.location_id.name"/></li>
+                        <li>Special Note: <t t-esc="object.special_note"/></li>
+                    </ul>
+                    <a t-att-href="object.get_record_url()" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
         </record>
 
         <record id="new_tyr_received_approved_resolved" model="mail.template">
@@ -313,13 +339,27 @@
 
         <record id="new_tyr_progress" model="mail.template">
             <field name="name">Technology Request Assigned ( Email )</field>
-            <field name="body_type">qweb</field>
+            <!-- <field name="body_type">qweb</field> -->
             <field name="body_view_id" ref="new_tyr_progress_template"/>
             <field name="email_from">odooadmin@isyedu.org</field>
             <field name="subject">Ref - {{object.name}} [ Technology Request Assigned ]</field>
             <field name="email_to">{{object.assign_person.work_email}},{{object.request_person_email}}</field>
             <field name="model_id" ref="isy_ticketing.model_isy_technology_request"/>
             <field name="auto_delete" eval="False"/>
+            <field name="body_html">
+                <![CDATA[
+                    <t t-out="object.assign_person.name"/> is working on this task.
+                    <ul>
+                        <li>Reference Ticket Number: <t t-esc="object.name"/></li>
+                        <li>Original Request Subject: <t t-esc="object.subject"/></li>
+                        <li>Original Request Body: <t t-raw="object.body"/></li>
+                        <li>Location: <t t-raw="object.location_id.name"/></li>
+                        <li>Special Note: <t t-esc="object.special_note"/></li>
+                    </ul>
+                    <a t-att-href="object.get_record_url()" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                ]]>
+            </field>
+
         </record>
 
         <record id="new_tyr_rejected" model="mail.template">

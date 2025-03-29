@@ -13,7 +13,7 @@
             </xpath>
         </template>
 
-        <template id="portal_schedule_requests" name="Schedule Request Portal" inherit_id="portal.portal_my_home" priority="40">
+        <template id="portal_schedule_requests" name="Schedule Request Portal" inherit_id="portal.portal_my_home" priority="70">
             <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
                 <t t-if="request.env.user.portal_schedule_request or request.env.user.portal_schedule_request_user" t-call="isy_ticketing.portal_docs_entry">
                     <t t-set="title">Schedule Requests</t>

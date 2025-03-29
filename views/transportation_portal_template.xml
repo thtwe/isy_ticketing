@@ -14,7 +14,7 @@
             </xpath>
         </template>
 
-        <template id="portal_transportation_requests" name="Transportation Request Portal" inherit_id="portal.portal_my_home" priority="40">
+        <template id="portal_transportation_requests" name="Transportation Request Portal" inherit_id="portal.portal_my_home" priority="110">
             <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
                 <t t-if="request.env.user.portal_transportation_request or request.env.user.portal_transportation_request_user" t-call="isy_ticketing.portal_docs_entry">
                     <t t-set="title">Transportation Requests</t>
