@@ -608,7 +608,7 @@
             <field name="arch" type="xml">
                 <calendar 
                     string="Schedule Locations"
-                    color="reserved_obj.id"
+                    color="reserved_obj"
                     date_start="date_from_toshow"
                     date_stop="date_to_toshow">
                     <field name="reserved_obj"/>
