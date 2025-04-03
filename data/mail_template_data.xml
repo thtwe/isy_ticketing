@@ -425,7 +425,7 @@
                         <li>Start: <t t-out="object.schedule_start_date"/></li>
                         <li>Status: <t t-out="object.get_isy_ticketing_status()"/> </li>
                     </ul>
-                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
+                    <a t-attf-href="https://sas.isyedu.org/web#id={{object.id}}&action=1218&model=isy.ticketing.requests&view_type=form&menu_id=764" class="btn btn-beta" style="border-image-width:1;border-image-source:none;border-image-slice:100%;border-image-repeat:stretch;border-image-outset:0;" data-original-title="" title="" aria-describedby="tooltip108011">Go to Request</a>
                 ]]>
             </field>
         </record>

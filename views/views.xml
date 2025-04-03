@@ -561,8 +561,8 @@
                     <field name="request_id"/>
                     <field name="date_from_toshow" />
                     <field name="date_to_toshow" />
-                    <field name="date_from" invisible='1'/>
-                    <field name="date_to" invisible='1'/>
+                    <field name="date_from" column_invisible="True"/>
+                    <field name="date_to" column_invisible="True"/>
                     <field name="user"/>
                 </tree>
             </field>
