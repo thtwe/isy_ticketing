@@ -25,12 +25,10 @@ class ISYTechnologyRequest(models.Model):
     resolution_description = fields.Text(string="Resolution Description")
     key_type = fields.Selection([('technology', 'Technology Requests')], default='technology')
     from_email = fields.Boolean(string="Email Tickets (?)", default=False)
-    special_note = fields.Char(string="Note")
+    special_note = fields.Text(string="Note")
     next_reminder = fields.Date(string="Last Reminder")
     parent_id = fields.Many2one('isy.ticketing.requests', string="Ref Request#")
     location_id = fields.Many2one('stock.location', string='Resource/Location', domain=[('usage','=','internal'),('location_id','!=',False)])
-
-
 
     def _technology_request_reminder(self):
         _logger.info("==================Reminder Checking For Technologpy Request Started!========================")
