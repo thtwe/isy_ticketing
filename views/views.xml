@@ -576,7 +576,7 @@
                     <sheet>
                         <group>
                             <field name="reserved_obj" required="1" readonly="1"/>
-                            <field name="request_id" required="1" readonly="1"/>
+                            <field name="request_id" required="1" readonly="1"  context="{'form_view_ref': 'isy_ticketing.isy_ticketing_form_ser'}"/>
                             <field name="date_from_toshow" />
                             <field name="date_to_toshow" />
                             <field name="date_from" required="1" invisible="1"/>
@@ -612,7 +612,7 @@
                     date_start="date_from_toshow"
                     date_stop="date_to_toshow">
                     <field name="reserved_obj"/>
-                    <field name="request_id"/>
+                    <field name="request_id" context="{'form_view_ref': 'isy_ticketing.isy_ticketing_form_ser'}"/>
                     <field name="date_from_toshow"/>
                     <field name="date_to_toshow"/>
                     <field name="user"/>
