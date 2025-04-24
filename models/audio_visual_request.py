@@ -27,7 +27,7 @@ class ISYTAudioVisualRequest(models.Model):
     projector_qty = fields.Integer(String="Projector Qty")
     location_id = fields.Many2one('stock.location', string='Resource/Location', domain=[('usage','=','internal'),('location_id','!=',False)])
     special_note = fields.Text(string='Note')
-    cancellation_reason = fields.Char(string='Cancellation Reason')
+    cancellation_reason = fields.Text(string='Cancellation Reason')
     approver_id = fields.Many2one('res.users', string="Appprover", readonly=True)
     key_type = fields.Selection([('audio', 'Audio / Visual Requests')], default='audio')
     start_time_seconds = fields.Integer(string="Start Time (Seconds)", help="Stored in total seconds")

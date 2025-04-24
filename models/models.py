@@ -172,7 +172,7 @@ class IsyTicketingRequests(models.Model):
 
     requests_details = fields.One2many('isy.ticketing.requests.details', 'ticket_id', string="Request Details")
     parent_id = fields.Many2one('isy.ticketing.requests', string="Ref Request#")
-    cancellation_reason = fields.Char(string='Cancellation Reason')
+    cancellation_reason = fields.Text(string='Cancellation Reason')
     # need_chair = fields.Boolean(string = "Do you need chairs?")
     # need_chair_qty = fields.Integer(string = "If yes, how many chairs?")
     # need_table = fields.Boolean(string = "Do you need tables?")
