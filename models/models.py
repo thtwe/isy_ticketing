@@ -636,6 +636,12 @@ class IsyTicketingRequests(models.Model):
             result.resources_locations_reserved()
         return result
 
+    def float_time_to_hours_minutes(self, float_time):
+        hours = int(float_time)
+        minutes = round((float_time - hours) * 60)
+        return f"{hours:02d}:{minutes:02d}"
+
+
     def resources_locations_reserved(self):
         #Daily Avoid Sat, Sunday --> Improvement based on include weekends?
         #Monthly Allow all
@@ -645,11 +651,10 @@ class IsyTicketingRequests(models.Model):
 
         schedule_start_date = self.schedule_start_date
         schedule_end_date = self.schedule_end_date
-        start_time, end_time = self.start_time, self.end_time
-        #start_time_str = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(self.start_time) / 60, 60))
-        start_time_str = f"{int(self.start_time):02}:00"
-        end_time_str = f"{int(self.end_time):02}:00"
-        #end_time_str = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(self.end_time) / 60, 60))
+
+        start_time_str = self.float_time_to_hours_minutes(self.start_time)
+        end_time_str = self.float_time_to_hours_minutes(self.end_time)
+
         lst_reserved = []
         dict_reserved = {}
         if self.repeat_type == 'never':
@@ -706,8 +711,8 @@ class IsyTicketingRequests(models.Model):
         lst_date = []
         dist_date = {}
         day_avoid = [5, 6]
-        start_time_str = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(self.start_time) / 60, 60))
-        end_time_str = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(self.end_time) / 60, 60))
+        start_time_str = self.float_time_to_hours_minutes(self.start_time)
+        end_time_str = self.float_time_to_hours_minutes(self.end_time)
 
         if repeat_type == 'daily':
             for n in range(int((date2 - date1).days) + 1):
