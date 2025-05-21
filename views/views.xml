@@ -150,19 +150,29 @@
                                 <field name="name"/>
                             </h3>
                         </div>
-                        <group cols="2">
-                            <field name="request_type_id" domain="[('key_type','=',key_type)]" required="1" readonly="state != 'draft'"/>
-                            <field name="parent_id" readonly="1" invisible="key_type not in ['maintenance', 'technology']"/>
-                            <field name="is_request" invisible="1"/>
-                            <field name="request" invisible="is_request == False" required="is_request == True" readonly="state != 'draft'"/>
-                            <field name="location_address" readonly="1" invisible="key_type == 'transportation'"/> 
-                            <field name="is_old_location" invisible="1"/>
-                            <field name="stock_building_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False"/>
-                            <field name="stock_location_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False"/>
-                            <field name="due_date" readonly="state != 'draft'" invisible="key_type == 'schedule'" required="key_type != 'schedule'"/>
-                            <field name="user_ids" widget="many2many_tags" readonly="True" invisible="key_type == 'schedule'" options="{'no_create': True}"/>
-                            <field name="approver_ids" invisible="key_type != 'maintenance'" options="{'no_create': True}"/>
-                            <field name="before_starttime" required="1" readonly="state != 'waitingforapproval'" invisible="key_type != 'maintenance'" string="Setup Time"/>
+                        <group>
+                            <group>
+                                <field name="request_type_id" domain="[('key_type','=',key_type)]" required="1" readonly="state != 'draft'"/>
+                                <field name="parent_id" readonly="1" invisible="key_type not in ['maintenance', 'technology']"/>
+                                <field name="is_request" invisible="1"/>
+                                <field name="request" invisible="is_request == False" required="is_request == True" readonly="state != 'draft'"/>
+                                <field name="location_address" readonly="1" invisible="key_type == 'transportation'"/> 
+                                <field name="is_old_location" invisible="1"/>
+                                <field name="stock_building_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False"/>
+                                <field name="stock_location_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False"/>
+                                <field name="due_date" readonly="state != 'draft'" invisible="key_type == 'schedule'" required="key_type != 'schedule'"/>
+                                <field name="user_ids" widget="many2many_tags" readonly="True" invisible="key_type == 'schedule'" options="{'no_create': True}"/>
+                                <field name="approver_ids" invisible="key_type != 'maintenance'" options="{'no_create': True}"/>
+                                <field name="before_starttime" required="1" readonly="state != 'waitingforapproval'" invisible="key_type != 'maintenance'" string="Setup Time"/>
+                                <field name="attachment_1_filename" invisible="1"/>
+                                <field name="attachment_1" filename="attachment_1_filename" string="Attachment 1" widget="binary" />
+                                <field name="attachment_2_filename" invisible="1"/>
+                                <field name="attachment_2" filename="attachment_2_filename" string="Attachment 2" widget="binary" />
+                                <field name="attachment_3_filename" invisible="1"/>
+                                <field name="attachment_3" filename="attachment_3_filename" string="Attachment 3" widget="binary" />
+                            </group>
+                            <group>
+                            </group>
                         </group>
                         <notebook>
                                 <page string="Note" invisible="key_type == 'schedule'">

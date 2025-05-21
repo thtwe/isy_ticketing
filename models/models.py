@@ -183,6 +183,13 @@ class IsyTicketingRequests(models.Model):
     date_from_toshow = fields.Datetime(string='From Date (To Show)',compute='compute_date',store=True)
     date_to_toshow = fields.Datetime(string='To Date (To Show)',compute='compute_date',store=True)
 
+    attachment_1 = fields.Binary(string="Attachment 1", attachment=True)
+    attachment_1_filename = fields.Char(string="Attachment 1 Filename")
+    attachment_2 = fields.Binary(string="Attachment 2", attachment=True)
+    attachment_2_filename = fields.Char(string="Attachment 2 Filename")
+    attachment_3 = fields.Binary(string="Attachment 3", attachment=True)
+    attachment_3_filename = fields.Char(string="Attachment 3 Filename")
+
     @api.onchange('description')
     def _onchange_description(self):
         if self.description:
