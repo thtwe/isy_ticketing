@@ -5,7 +5,7 @@
         <template id="portal_docs_entry" name="My Portal Docs Entry">
             <a t-att-href="url" t-att-target="'_blank'" t-att-title="title" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">
                 <t t-esc="title"/>
-                <span class="badge badge-secondary badge-pill" t-esc="count"/>
+                <span class="badge badge-secondary badge-pill" t-esc="count" style="color:black;"/>
             </a>
         </template>
 
