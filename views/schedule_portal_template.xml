@@ -80,7 +80,7 @@
                                 <td>
                                     <t t-esc="me_req.create_uid.name" t-if="me_req.create_uid"/>
                                 </td>
-                                <td class="text-center"><span class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
+                                <td class="text-center"><t class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
                                 <td class='d-none d-md-table-cell'><span t-field="me_req.schedule_start_date"/></td>
                                 <td class='d-none d-md-table-cell'><span t-field="me_req.start_time"/></td>
                                 <td class='d-none d-md-table-cell'><span t-field="me_req.end_time"/></td>

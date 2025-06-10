@@ -2,40 +2,40 @@
     <data>
         <!-- Complete page of the maintenance Request -->
 
-        <template id="audio_requests" name="Portal layout : audio menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
+        <template id="clinic_requests" name="Portal layout : clinic menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
             <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-                <li t-if="page_name == 'audio_request' or audio_request" t-attf-class="breadcrumb-item #{'active ' if not audio_request else ''}">
-                    <a t-if="audio_requests" t-attf-href="/my/audio_requests?{{ keep_query() }}">Audio / Visual Requests</a>
-                    <t t-else="">Audio / Visaual Requests</t>
+                <li t-if="page_name == 'clinic_request' or clinic_request" t-attf-class="breadcrumb-item #{'active ' if not clinic_request else ''}">
+                    <a t-if="clinic_requests" t-attf-href="/my/clinic_requests?{{ keep_query() }}">Clinic Requests</a>
+                    <t t-else="">Clinic Requests</t>
                 </li>
-                <li t-if="audio_request" class="breadcrumb-item active">
-                    <t t-esc="audio_requestt.name"/>
+                <li t-if="clinic_request" class="breadcrumb-item active">
+                    <t t-esc="clinic_request.name"/>
                 </li>
             </xpath>
         </template>
 
-        <template id="portal_audio_requests" name="Audio Request Portal" inherit_id="portal.portal_my_home" priority="20">
+        <template id="portal_clinic_requests" name="Clinic Request Portal" inherit_id="portal.portal_my_home" priority="20">
             <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-                <t t-if="request.env.user.portal_audio_request or request.env.user.portal_audio_request_user" t-call="isy_ticketing.portal_docs_entry">
-                    <t t-set="title">Audio / Visual Requests</t>
-                    <t t-set="url" t-value="'/my/audio_requests'"/>
-                    <t t-set="count" t-value="audio_requests_count"/>
+                <t t-if="request.env.user.portal_clinic_request_user or request.env.user.portal_clinic_request_user" t-call="isy_ticketing.portal_docs_entry">
+                    <t t-set="title">Clinic Requests</t>
+                    <t t-set="url" t-value="'/my/clinic_requests'"/>
+                    <t t-set="count" t-value="clinic_requests_count"/>
                 </t>
             </xpath>
         </template>
 
-        <template id="portal_my_audio_requests" name="My Aduio / Visual Requests">
+        <template id="portal_my_clinic_requests" name="My Aduio / Visual Requests">
             <t t-call="portal.portal_layout">
                 <t t-set="breadcrumbs_searchbar" t-value="True"/>
 
                 <t t-call="portal.portal_searchbar">
-                    <t t-set="title">Audio / Visual Requests</t>
+                    <t t-set="title">Clinic Requests</t>
                 </t>
                 <hr/>
                 <div class="row">
                     <div class="form-group">
                         <div class="col-sm-12">
-                            <a t-attf-href="/web#view_type=form&amp;model=isy.audio.request&amp;&amp;action=isy_ticketing.menu_isy_audio_visual_request_action" class="btn btn-info">New Audio / Visual Request</a>
+                            <a t-attf-href="/web#view_type=form&amp;model=isy.clinic.request&amp;&amp;action=isy_ticketing.menu_isy_clinic_request_action" class="btn btn-info">New Clinic Request</a>
                         </div>
                     </div>
                 </div>
@@ -47,15 +47,16 @@
                             <th>Ref #</th>
                             <th>Subject</th>
                             <th>Request Person</th>
+                            <th>Assign Person</th>
                             <th>Event Date</th>
                             <th class="text-right">Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <t t-foreach="audio_requests" t-as="me_req">
+                        <t t-foreach="clinic_requests" t-as="me_req">
                             <tr>
                                 <td>
-                                    <a class="btn btn-info" t-att-href="'/web#return_label=Website&amp;model=isy.audio.request&amp;id=%s&amp;view_type=form' % (me_req.id)">
+                                    <a class="btn btn-info" t-att-href="'/web#return_label=Website&amp;model=isy.clinic.request&amp;id=%s&amp;view_type=form' % (me_req.id)">
                                         <i class="fa fa-edit"></i>
                                     </a>
                                 </td>
@@ -66,13 +67,15 @@
                                     <t t-esc="me_req.subject" t-if="me_req.subject"/>
                                 </td>
                                 <td>
-                                    <t t-esc="me_req.assign_person.name" t-if="me_req.assign_person"/>
+                                    <t t-esc="me_req.request_person.name" t-if="me_req.request_person"/>
+                                </td>
+                                <td>
+                                    <t t-esc="me_req.assign_person_id.name" t-if="me_req.assign_person_id"/>
                                 </td>
                                 <td>
                                     <t t-esc="me_req.event_date" t-if="me_req.event_date"/>
                                 </td>
                                 <td class="text-right"><t class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
-    
 
                             </tr>
                         </t>

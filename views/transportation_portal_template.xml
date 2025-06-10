@@ -88,7 +88,7 @@
                                 <td class='d-none d-md-table-cell'><span t-field="me_req.resolved_date"/></td>
                                 <td class='d-none d-md-table-cell'><span t-field="me_req.no_of_passengers"/></td>
                                 <td class='d-none d-md-table-cell'><span t-field="me_req.fleet"/></td>
-                                <td class="text-center"><span class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
+                                <td class="text-center"><t class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
                             </tr>
                         </t>
                     </tbody>

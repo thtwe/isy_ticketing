@@ -1591,6 +1591,7 @@ class ResUsers(models.Model):
     portal_transportation_request_driver = fields.Boolean(string='Portal Transportation Driver', copy=True, default=False)
     portal_schedule_request_user = fields.Boolean(string="Portal Schedule User", copy=True, default=False)
     portal_audio_request_user = fields.Boolean(string="Portal Audio User", copy=True, default=False)
+    portal_clinic_request_user = fields.Boolean(string="Portal Clinic User", copy=True, default=False)
     check_availability = fields.Boolean(default=True, copy=False)
     reserved_time = fields.One2many('driver.allocation', 'user', String='Allocation Times', readonly=1,
                                                                     ondelete='cascade')

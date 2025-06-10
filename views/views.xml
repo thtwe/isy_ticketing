@@ -36,6 +36,7 @@
                                 <field name="portal_transportation_request_user"/>
                                 <field name="portal_transportation_request_driver"/>
                                 <field name="portal_audio_request_user"/>
+                                <field name="portal_clinic_request_user"/>
                         </group>
                 </xpath>
             </field>

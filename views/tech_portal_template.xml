@@ -73,7 +73,7 @@
                                 <td>
                                     <t t-esc="me_req.assign_date" t-if="me_req.assign_date"/>
                                 </td>
-                                <td class="text-right"><span class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
+                                <td class="text-right"><t class="badge badge-pill badge-info" t-esc="dict(me_req._fields['state'].selection).get(me_req.state)"/></td>
                                 <td class='d-none d-md-table-cell'><span t-field="me_req.resolution_description"/></td>
                                 <td class='d-none d-md-table-cell'><span t-field="me_req.resolved_date"/></td>
 
