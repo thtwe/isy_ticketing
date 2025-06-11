@@ -58,7 +58,7 @@
             <field name="name">Clinic Request Calendar</field>
             <field name="model">isy.clinic.request</field>
             <field name="arch" type="xml">
-                <calendar color="name" date_start="date_from_to_show" date_stop="date_to_toshow" string="Clinic Request">
+                <calendar color="display_name" date_start="date_from_to_show" date_stop="date_to_toshow" string="Clinic Request">
                     <field name="name"/>
                     <field name="subject"/>
                     <field name="assign_person_id"/>

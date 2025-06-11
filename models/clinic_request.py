@@ -4,7 +4,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.tools import email_split
 from odoo.tools import html2plaintext
 from odoo.addons.mail.models import mail_template
-import datetime
+from datetime import datetime, timedelta
 import logging
 import math
 _logger = logging.getLogger(__name__)
@@ -51,12 +51,29 @@ class ISYClinicRequest(models.Model):
     second_approver_id = fields.Many2one('hr.employee', string="Second Approver", related='assign_person_id.assign_person_manager_id')
     date_from_to_show = fields.Datetime(string='Date From to Show', compute='_compute_date_from_to_show')
     date_to_toshow = fields.Datetime(string='Date To Show', compute='_compute_date_from_to_show')
+    display_name = fields.Char(string='Display Name', compute='_compute_display_name')
+
+    @api.depends('name', 'state')
+    def _compute_display_name(self):
+        for rec in self:
+            rec.display_name = f"{rec.name} - {' '.join(rec.state.split('_')).capitalize()}"
 
     @api.depends('event_date', 'start_time', 'end_time')
     def _compute_date_from_to_show(self):
         for rec in self:
-            rec.date_from_to_show = f"{str(rec.event_date)} {self.float_time_to_hours_minutes(rec.start_time)}"
-            rec.date_to_toshow = f"{str(rec.event_date)} {self.float_time_to_hours_minutes(rec.end_time)}"
+            if rec.event_date and rec.start_time and rec.end_time:
+                start_hour, start_minute = self.float_time_to_hours_minutes(rec.start_time)
+                end_hour, end_minute = self.float_time_to_hours_minutes(rec.end_time)
+                # Combine with event_date to create datetime object
+                start_dt = datetime.combine(rec.event_date, datetime.min.time()) + timedelta(hours=start_hour, minutes=start_minute)
+                end_dt = datetime.combine(rec.event_date, datetime.min.time()) + timedelta(hours=end_hour, minutes=end_minute)
+
+                # Subtract 6 hours 30 minutes
+                rec.date_from_to_show = start_dt - timedelta(hours=6, minutes=30)
+                rec.date_to_toshow = end_dt - timedelta(hours=6, minutes=30)
+            else:
+                rec.date_from_to_show = False
+                rec.date_to_toshow = False
 
     @api.model
     def create(self, vals):
@@ -76,13 +93,15 @@ class ISYClinicRequest(models.Model):
     def float_time_to_hours_minutes(self, float_time):
         hours = int(float_time)
         minutes = round((float_time - hours) * 60)
-        return f"{hours:02d}:{minutes:02d}"
+        return hours, minutes
 
     def get_start_time_str(self):
-        return self.float_time_to_hours_minutes(self.start_time)
+        start_hour, start_minute = self.float_time_to_hours_minutes(self.start_time)
+        return f"{start_hour:02d}:{start_minute:02d}"
 
     def get_end_time_str(self):
-        return self.float_time_to_hours_minutes(self.end_time)
+        end_hour, end_minute = self.float_time_to_hours_minutes(self.end_time)
+        return f"{end_hour:02d}:{end_minute:02d}"
 
     def confirm_request(self):
         for rec in self:
