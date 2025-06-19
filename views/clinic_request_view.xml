@@ -121,7 +121,12 @@
                             <field name="assign_person_id" readonly="state != 'draft'"/>
                             <field name="first_approver_id"/>
                             <field name="second_approver_id"/>    
-
+                            <field name="attachment_1_filename" invisible="1"/>
+                            <field name="attachment_1" filename="attachment_1_filename" string="Attachment 1" widget="binary" />
+                            <field name="attachment_2_filename" invisible="1"/>
+                            <field name="attachment_2" filename="attachment_2_filename" string="Attachment 2" widget="binary" />
+                            <field name="attachment_3_filename" invisible="1"/>
+                            <field name="attachment_3" filename="attachment_3_filename" string="Attachment 3" widget="binary" />
                         </group>
                         <notebook>
                             <page string="Note">

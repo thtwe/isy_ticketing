@@ -53,6 +53,13 @@ class ISYClinicRequest(models.Model):
     date_to_toshow = fields.Datetime(string='Date To Show', compute='_compute_date_from_to_show')
     display_name = fields.Char(string='Display Name', compute='_compute_display_name')
 
+    attachment_1 = fields.Binary(string="Attachment 1", attachment=True)
+    attachment_1_filename = fields.Char(string="Attachment 1 Filename")
+    attachment_2 = fields.Binary(string="Attachment 2", attachment=True)
+    attachment_2_filename = fields.Char(string="Attachment 2 Filename")
+    attachment_3 = fields.Binary(string="Attachment 3", attachment=True)
+    attachment_3_filename = fields.Char(string="Attachment 3 Filename")
+
     @api.depends('name', 'state')
     def _compute_display_name(self):
         for rec in self:
