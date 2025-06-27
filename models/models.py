@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests
-
+import json
 from odoo import models, fields, api, _, SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
 from datetime import datetime
@@ -233,52 +233,30 @@ class IsyTicketingRequests(models.Model):
                 rec.date_to_toshow = rec.date_to+timedelta(hours=6, minutes=30)
 
     @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        res = super(IsyTicketingRequests, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
-        if view_type == 'form' and self.env.context.get('params'):
-            #if self.env.user.has_group('base.group_portal') and self.env.us.portal_transportation_request_user:
+    def get_view(self, view_id=None, view_type='form', **options):
+        res = super(IsyTicketingRequests, self).get_view(view_id=view_id, view_type=view_type, **options)
+        ref_view_id = self.env.ref('isy_ticketing.isy_ticketing_form_transportaion')
+
+        if view_type == 'form' and self._module == 'isy_ticketing' and view_id == ref_view_id.id:
             doc = etree.XML(res['arch'])
-            if self.env.context['params'].get('id'):
-                obj_rec = self.browse([self.env.context['params'].get('id')])
-                if obj_rec.key_type == 'transportation' and obj_rec.state in ('waitingfordriverassign','waitingforapproval', 'pendingresolution'):
-                    if self.env.user.has_group('base.group_portal') and self.env.user.portal_transportation_request_user:
-                        fleet_field = doc.xpath("//field[@name='fleet']")
-                        fleet_field[0].set('modifiers', '{"readonly": false}')
-                        rental_vehicle = doc.xpath("//field[@name='rental_vehicle']")
-                        rental_vehicle[0].set('modifiers', '{"readonly": false}')
-                    elif self.env.user.has_group('isy_ticketing.group_tnr_user'):
-                        fleet_field = doc.xpath("//field[@name='fleet']")
-                        fleet_field[0].set('modifiers', '{"readonly": false}')
-                        rental_vehicle = doc.xpath("//field[@name='rental_vehicle']")
-                        rental_vehicle[0].set('modifiers', '{"readonly": false}')
-                    elif self.env.user.has_group('isy_ticketing.group_tnr_manager'):
-                        fleet_field = doc.xpath("//field[@name='fleet']")
-                        fleet_field[0].set('modifiers', '{"readonly": false}')
-                        rental_vehicle = doc.xpath("//field[@name='rental_vehicle']")
-                        rental_vehicle[0].set('modifiers', '{"readonly": false}')
+            if self.env.user.has_group('isy_ticketing.group_tnr_manager'):
 
-            if self.env.user.has_group('isy_ticketing.group_mr_manager') and self.env.context.get('params'):
-                if self.env.context['params'].get('id'):
-                    obj_rec = self.browse([self.env.context['params'].get('id')])
-                    if obj_rec.state in ('draft', 'waitingforapproval'):
-                        request_type = doc.xpath("//field[@name='request_type_id']")
-                        request_type[0].set('modifiers', '{"readonly": false}')
-                    else:
-                        request_type = doc.xpath("//field[@name='request_type_id']")
-                        request_type[0].set('modifiers', '{"readonly": true}')
+                for field_name in ['fleet', 'rental_vehicle', 'request_type_id']:
+                    nodes = doc.xpath(f"//field[@name='{field_name}']")
+                    if nodes:
+                        node = nodes[0]
 
-                    if obj_rec.state != 'waitingforapproval':
-                        request_type = doc.xpath("//field[@name='user_ids']")
-                        request_type[0].set('modifiers', '{"readonly": true}')
-                    else:
-                        request_type = doc.xpath("//field[@name='user_ids']")
-                        request_type[0].set('modifiers', '{"readonly": false}')
-            elif not self.env.user.has_group('isy_ticketing.group_mr_manager'):
-                request_type = doc.xpath("//field[@name='user_ids']")
-                request_type[0].set('modifiers', '{"readonly": true}')
+                        # Remove 'readonly' XML attribute (very important!)
+                        if 'readonly' in node.attrib:
+                            del node.attrib['readonly']
 
-            res['arch'] = etree.tostring(doc)
-            # res contains the view form, and you can manipulate res string, as you desired.
+                        # Update modifiers
+                        modifiers = json.loads(node.get("modifiers", "{}"))
+                        modifiers["readonly"] = False
+                        node.set("modifiers", json.dumps(modifiers))
+
+            res['arch'] = etree.tostring(doc, encoding='unicode')
+
         return res
 
     def clean_old_data(self):
