@@ -41,6 +41,8 @@
         'views/audio_portal_template.xml',
         'views/clinic_portal_template.xml',
         'views/clinic_request_view.xml',
+        'views/communication_portal_template.xml',
+        'views/communication_request_view.xml',
         'data/ir_sequence_data.xml',
         'wizard/isy_ticketing_resolve_view.xml',
         'data/ir_ui_view.xml',

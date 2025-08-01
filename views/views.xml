@@ -30,6 +30,8 @@
                                 <field name="portal_transportation_request"/>
                                 <field name="portal_schedule_request"/>
                                 <field name="portal_audio_request"/>
+                                <field name="portal_clinic_request"/>
+                                <field name="portal_communication_request"/>
                                 <!--- Portal User -->
                                 <field name="portal_maintenance_request_user"/>
                                 <field name="portal_technology_request_user"/>
@@ -37,6 +39,7 @@
                                 <field name="portal_transportation_request_driver"/>
                                 <field name="portal_audio_request_user"/>
                                 <field name="portal_clinic_request_user"/>
+                                <field name="portal_communication_request_user"/>
                         </group>
                 </xpath>
             </field>

@@ -8,7 +8,6 @@ import logging
 import math
 _logger = logging.getLogger(__name__)
 
-
 class ResUsers(models.Model):
     _inherit = "res.users"
 
@@ -16,12 +15,18 @@ class ResUsers(models.Model):
     portal_technology_request = fields.Boolean(string='Portal Technology Requestor', copy=True, default=False)
     portal_transportation_request = fields.Boolean(string='Portal Transportation Requestor', copy=True, default=False)
     portal_schedule_request = fields.Boolean(string="Portal Schedule Requestor", copy=True, default=False)
+    portal_audio_request = fields.Boolean(string="Portal Audio Requestor", copy=True, default=False)
+    portal_clinic_request = fields.Boolean(string="Portal Clinic Requestor", copy=True, default=False)
+    portal_communication_request = fields.Boolean(string="Portal Communication Requestor", copy=True, default=False)
 
     portal_maintenance_request_user = fields.Boolean(string='Portal Maintenance User', copy=True, default=False)
     portal_technology_request_user = fields.Boolean(string='Portal Technology User', copy=True, default=False)
     portal_transportation_request_user = fields.Boolean(string='Portal Transportation User', copy=True, default=False)
     portal_transportation_request_driver = fields.Boolean(string='Portal Transportation Driver', copy=True, default=False)
     portal_schedule_request_user = fields.Boolean(string="Portal Schedule User", copy=True, default=False)
+    portal_audio_request_user = fields.Boolean(string="Portal Audio User", copy=True, default=False)
+    portal_clinic_request_user = fields.Boolean(string="Portal Clinic User", copy=True, default=False)
+    portal_communication_request_user = fields.Boolean(string="Portal Communication User", copy=True, default=False)
 
     check_availability = fields.Boolean(default=True, copy=False)
     reserved_time = fields.One2many('driver.allocation', 'user', String='Allocation Times', readonly=1,

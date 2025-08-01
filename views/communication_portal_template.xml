@@ -2,40 +2,40 @@
     <data>
         <!-- Complete page of the maintenance Request -->
 
-        <template id="clinic_requests" name="Portal layout : clinic menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
+        <template id="communication_requests" name="Portal layout : communication menu entries" inherit_id="portal.portal_breadcrumbs" priority="25">
             <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-                <li t-if="page_name == 'clinic_request' or clinic_request" t-attf-class="breadcrumb-item #{'active ' if not clinic_request else ''}">
-                    <a t-if="clinic_requests" t-attf-href="/my/clinic_requests?{{ keep_query() }}">Clinic Requests</a>
-                    <t t-else="">Clinic Requests</t>
+                <li t-if="page_name == 'communication_request' or communication_request" t-attf-class="breadcrumb-item #{'active ' if not communication_request else ''}">
+                    <a t-if="communication_requests" t-attf-href="/my/communication_requests?{{ keep_query() }}">Communication Requests</a>
+                    <t t-else="">Communication Requests</t>
                 </li>
-                <li t-if="clinic_request" class="breadcrumb-item active">
-                    <t t-esc="clinic_request.name"/>
+                <li t-if="communication_request" class="breadcrumb-item active">
+                    <t t-esc="communication_request.name"/>
                 </li>
             </xpath>
         </template>
 
-        <template id="portal_clinic_requests" name="Clinic Request Portal" inherit_id="portal.portal_my_home" priority="20">
+        <template id="portal_communication_requests" name="Communication Request Portal" inherit_id="portal.portal_my_home" priority="21">
             <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-                <t t-if="request.env.user.portal_clinic_request or request.env.user.portal_clinic_request_user" t-call="isy_ticketing.portal_docs_entry">
-                    <t t-set="title">Clinic Requests</t>
-                    <t t-set="url" t-value="'/my/clinic_requests'"/>
-                    <t t-set="count" t-value="clinic_requests_count"/>
+                <t t-if="request.env.user.portal_communication_request or request.env.user.portal_communication_request_user" t-call="isy_ticketing.portal_docs_entry">
+                    <t t-set="title">Communication Requests</t>
+                    <t t-set="url" t-value="'/my/communication_requests'"/>
+                    <t t-set="count" t-value="communication_requests_count"/>
                 </t>
             </xpath>
         </template>
 
-        <template id="portal_my_clinic_requests" name="My Clinic Requests">
+        <template id="portal_my_communication_requests" name="My Communication Requests">
             <t t-call="portal.portal_layout">
                 <t t-set="breadcrumbs_searchbar" t-value="True"/>
 
                 <t t-call="portal.portal_searchbar">
-                    <t t-set="title">Clinic Requests</t>
+                    <t t-set="title">Communication Requests</t>
                 </t>
                 <hr/>
                 <div class="row">
                     <div class="form-group">
                         <div class="col-sm-12">
-                            <a t-attf-href="/web#view_type=form&amp;model=isy.clinic.request&amp;&amp;action=isy_ticketing.menu_isy_clinic_request_action" class="btn btn-info">New Clinic Request</a>
+                            <a t-attf-href="/web#view_type=form&amp;model=isy.communication.request&amp;&amp;action=isy_ticketing.menu_isy_communication_request_action" class="btn btn-info">New Communication Request</a>
                         </div>
                     </div>
                 </div>
@@ -53,10 +53,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <t t-foreach="clinic_requests" t-as="me_req">
+                        <t t-foreach="communication_requests" t-as="me_req">
                             <tr>
                                 <td>
-                                    <a class="btn btn-info" t-att-href="'/web#return_label=Website&amp;model=isy.clinic.request&amp;id=%s&amp;view_type=form' % (me_req.id)">
+                                    <a class="btn btn-info" t-att-href="'/web#return_label=Website&amp;model=isy.communication.request&amp;id=%s&amp;view_type=form' % (me_req.id)">
                                         <i class="fa fa-edit"></i>
                                     </a>
                                 </td>

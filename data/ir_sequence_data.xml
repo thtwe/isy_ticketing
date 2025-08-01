@@ -66,6 +66,14 @@
             <field name="implementation">no_gap</field>
         </record>
         
+        <record id="seq_isy_ticketing_requests_communication" model="ir.sequence">
+            <field name="name">ISY Ticketing Requests (Communication)</field>
+            <field name="code">isy.ticketing.requests.communication</field>
+            <field name="prefix">COM%(year)s%(month)s%(day)s_</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+            <field name="implementation">no_gap</field>
+        </record>
 
     </data>
 </odoo>
