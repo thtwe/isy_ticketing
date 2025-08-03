@@ -1,58 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-
-        <record model="ir.ui.view" id="isy_clinic_assign_person_tree">
-            <field name="name">ISY Clinic Assign Person Tree</field>
-            <field name="model">isy.clinic.assign.person</field>
-            <field name="arch" type="xml">
-                <tree default_order='name desc'>
-                    <field name="assign_person_id"/>
-                    <field name="assign_person_email"/>
-                    <field name="assign_person_manager_id"/>
-                    <field name="assign_person_manager_email"/>
-                </tree>
-            </field>
-        </record>
-
-        <record model="ir.ui.view" id="isy_clinic_assign_person_form">
-            <field name="name">ISY Clinic Assign Person Form</field>
-            <field name="model">isy.clinic.assign.person</field>
-            <field name="arch" type="xml">
-                <form>
-                    <sheet>
-                        <group cols="2">
-                            <group>
-                                <field name="assign_person_id"/>
-                                <field name="assign_person_email"/>
-                                <field name="assign_person_manager_id"/>
-                                <field name="assign_person_manager_email"/>
-                            </group>
-                            <group>
-                                <field name="active"/>
-                            </group>
-                        </group>
-                    </sheet>
-                </form>
-            </field>
-        </record>
-
-        <record model="ir.actions.act_window" id="menu_isy_clinic_assign_person_action">
-            <field name="name">Clinic Assign Person</field>
-            <field name="res_model">isy.clinic.assign.person</field>
-            <field name="view_mode">tree,form</field>
-            <field name="context">{}</field>
-            <field name="domain">[]</field>
-        </record>
-
-
-        <menuitem
-            name="Clinic Assign Person"
-            id="isy_ticketing.menu_clinic_assign_person"
-            parent="isy_ticketing.menu_settings"
-            action="isy_ticketing.menu_isy_clinic_assign_person_action"
-            sequence="10"/>
-
         <!-- Clinic Request Tree -->
         <record model="ir.ui.view" id="isy_clinic_request_calendar">
             <field name="name">Clinic Request Calendar</field>

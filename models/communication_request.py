@@ -43,7 +43,7 @@ class ISYCommunicationRequest(models.Model):
     special_note = fields.Text(string='Note')
     cancellation_reason = fields.Text(string='Cancellation Reason')
     approver_id = fields.Many2one('res.users', string="Appprover", default=lambda self: self._get_default_approver_id(), required=True)
-    assign_person_id = fields.Many2one('hr.employee', string="Assign Person")
+    assign_person_id = fields.Many2one('isy.ticketing.assign.person', string="Assign Person", domain=[('request_type', '=', 'communication')])
     date_from_to_show = fields.Datetime(string='Date From to Show', compute='_compute_date_from_to_show')
     date_to_toshow = fields.Datetime(string='Date To Show', compute='_compute_date_from_to_show')
 
@@ -122,6 +122,6 @@ class ISYCommunicationRequest(models.Model):
 
     def done_request(self):
         for rec in self:
-            if rec.env.user.login not in ('odooadmin@isyedu.org', rec.assign_person_id.work_email, rec.approver_id.login):
+            if rec.env.user.login not in ('odooadmin@isyedu.org', rec.assign_person_id.assign_person_email, rec.approver_id.login):
                 raise ValidationError(_("You are not authorized to done this request."))
             rec.state = "done"

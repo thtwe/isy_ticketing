@@ -39,6 +39,7 @@
         'views/stationary_request_portal_template.xml',
         'views/audio_visual_request_view.xml',
         'views/audio_portal_template.xml',
+        'views/ticketing_assign_view.xml',
         'views/clinic_portal_template.xml',
         'views/clinic_request_view.xml',
         'views/communication_portal_template.xml',

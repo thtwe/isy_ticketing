@@ -28,7 +28,7 @@ class ISYClinicRequest(models.Model):
 
     name = fields.Char(string="Request ID", readonly=True, required=True, copy=False, default='New', index=True)
     subject = fields.Char(string="Subject")
-    assign_person_id = fields.Many2one('isy.clinic.assign.person', string="Assign Person", required=True)
+    assign_person_id = fields.Many2one('isy.ticketing.assign.person', string="Assign Person", required=True, domain=[('request_type', '=', 'clinic')])
     request_person = fields.Many2one('hr.employee', string="Request Person")
     request_person_email = fields.Char(string="Request Person Email", related='request_person.work_email')
     state = fields.Selection([

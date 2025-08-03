@@ -113,7 +113,7 @@
                             <field name="request_date" readonly="1"/>
                             <field name="request_person" readonly="1"/>
                             <field name="request_person_email" readonly="1"/>
-                            <field name="assign_person_id" readonly="state != 'draft'"/>
+                            <field name="assign_person_id" readonly="state != 'request_for_approval'"/>
                             <field name="approver_id" readonly="1"/>
                         </group>
                         <notebook>
@@ -121,7 +121,7 @@
                                 <field name="special_note" readonly="state == 'done'" placeholder="Special note which translate request from body by responsible person"/>
                             </page>
                             <page string="Cancellation Reason" groups="isy_ticketing.group_communication_user,isy_ticketing.group_communication_manager">
-                                <field name="cancellation_reason" placeholder="Cancellation Reason" readonly="state != 'draft'"/>
+                                <field name="cancellation_reason" placeholder="Cancellation Reason" readonly="state == 'done'"/>
                             </page>
                         </notebook>
                     </sheet>

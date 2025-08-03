@@ -12,7 +12,7 @@ class CustomerPortal(CustomerPortal):
 
     def _prepare_portal_layout_values(self):
         values = super(CustomerPortal, self)._prepare_portal_layout_values()
-        domain = ['|', ('assign_person_id.work_email', '=', request.env.user.login), '|', ('approver_id.login', '=', request.env.user.login), '&', ('create_uid', '=', request.env.user.id), ('message_partner_ids', 'in', [request.env.user.partner_id.id])]
+        domain = ['|', ('assign_person_id.assign_person_email', '=', request.env.user.login), '|', ('approver_id.login', '=', request.env.user.login), '&', ('create_uid', '=', request.env.user.id), ('message_partner_ids', 'in', [request.env.user.partner_id.id])]
         communication_requests_count = request.env['isy.communication.request'].search_count(domain)
         values['communication_requests_count'] = communication_requests_count
         return values
@@ -43,7 +43,7 @@ class CustomerPortal(CustomerPortal):
             'name': {'input': 'name', 'label': _('Search in Ref #')},
             'all': {'input': 'all', 'label': _('Search in All')},
         }
-        domain += ['|', ('assign_person_id.work_email', '=', request.env.user.login), '|', ('approver_id.login', '=', request.env.user.login), '&', ('create_uid', '=', request.env.user.id), ('message_partner_ids', 'in', [request.env.user.partner_id.id])]
+        domain += ['|', ('assign_person_id.assign_person_email', '=', request.env.user.login), '|', ('approver_id.login', '=', request.env.user.login), '&', ('create_uid', '=', request.env.user.id), ('message_partner_ids', 'in', [request.env.user.partner_id.id])]
         # default sort by order
         if not sortby:
             sortby = 'name'
