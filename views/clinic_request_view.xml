@@ -81,7 +81,7 @@
                                 <field name="special_note" readonly="state == 'done'" placeholder="Special note which translate request from body by responsible person"/>
                             </page>
                             <page string="Cancellation Reason" groups="isy_ticketing.group_clinic_user,isy_ticketing.group_clinic_manager">
-                                <field name="cancellation_reason" placeholder="Cancellation Reason" readonly="state != 'draft'"/>
+                                <field name="cancellation_reason" placeholder="Cancellation Reason" readonly="state == 'draft'"/>
                             </page>
                         </notebook>
                     </sheet>
