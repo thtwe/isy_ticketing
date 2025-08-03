@@ -44,7 +44,7 @@
                         <button string="Approve" groups="isy_ticketing.group_clinic_manager" type="object" class="oe_highlight" name="approve_request" invisible="state not in ('request_for_approval')"/>
                         <button string="Reject" groups="isy_ticketing.group_clinic_user" type="object" class="oe_highlight" name="reject_request" invisible="state not in ('request_for_confirmation','request_for_approval')"/>
                         <button string="Done" type="object" class="oe_highlight" name="done_request" groups="isy_ticketing.group_clinic_requestor" invisible="state != 'approved'"/>
-                        <button string="Cancel" type="object" class="oe_highlight" name="request_cancelled" invisible="state not in ('draft','request_for_confirmation','request_for_approval','approved')"/>
+                        <button string="Cancel" type="object" class="oe_highlight" name="request_cancelled" invisible="state not in ('request_for_confirmation','request_for_approval','approved')"/>
                     
                         <field name="state" widget="statusbar" statusbar_visible="draft,request_for_confirmation,request_for_approval,approved,rejected,done,cancelled"/>
 
