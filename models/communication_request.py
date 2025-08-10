@@ -5,6 +5,8 @@ from odoo.tools import email_split
 from odoo.tools import html2plaintext
 from odoo.addons.mail.models import mail_template
 from datetime import datetime, timedelta
+from pytz import timezone
+
 import logging
 import math
 _logger = logging.getLogger(__name__)
@@ -50,10 +52,25 @@ class ISYCommunicationRequest(models.Model):
     def _get_default_approver_id(self):
         return int(self.env['ir.config_parameter'].sudo().get_param('isy.communication_request_approver', 184))
 
+    def _check_event_date_start_time_end_time(self, event_date, start_time, end_time):
+        user_tz = self.env.user.tz or 'UTC'
+        now = fields.Datetime.context_timestamp(self, fields.Datetime.now()).astimezone(timezone(user_tz))
+        current_time_float = now.hour + now.minute / 60.0
+        today_date = str(fields.date.today())
+        if event_date < today_date:
+            raise ValidationError(_("Event Date must be after or equal current date!"))
+        if event_date == today_date and start_time < current_time_float:
+            raise ValidationError(_("Start Time must be after current time!"))
+        if start_time < 0 or end_time < 0:
+            raise ValidationError(_("Start Time and End Time must be greater than 0!"))
+        if start_time > end_time:
+            raise ValidationError(_("Start Time must be before End Time!"))
+
     @api.depends('event_date', 'start_time', 'end_time')
     def _compute_date_from_to_show(self):
         for rec in self:
             if rec.event_date and rec.start_time and rec.end_time:
+                rec._check_event_date_start_time_end_time(rec.event_date, rec.start_time, rec.end_time)
                 start_hour, start_minute = self.float_time_to_hours_minutes(rec.start_time)
                 end_hour, end_minute = self.float_time_to_hours_minutes(rec.end_time)
                 # Combine with event_date to create datetime object
@@ -69,6 +86,7 @@ class ISYCommunicationRequest(models.Model):
 
     @api.model
     def create(self, vals):
+        self._check_event_date_start_time_end_time(vals.get('event_date'), vals.get('start_time'), vals.get('end_time'))
         if vals.get('name', 'New') == 'New':
             vals['name'] = self.env['ir.sequence'].next_by_code('isy.ticketing.requests.communication') or 'New'
         if not vals.get('request_person'):
@@ -79,6 +97,14 @@ class ISYCommunicationRequest(models.Model):
         vals['state'] = 'request_for_approval'
         record = super(ISYCommunicationRequest, self).create(vals)
         return record 
+
+    def write(self, vals):
+        if 'event_date' in vals or 'start_time' in vals or 'end_time' in vals:
+            event_date = vals.get('event_date', self.event_date)
+            start_time = vals.get('start_time', self.start_time)
+            end_time = vals.get('end_time', self.end_time)
+            self._check_event_date_start_time_end_time(event_date, start_time, end_time)
+        return super(ISYCommunicationRequest, self).write(vals)
 
     def float_time_to_hours_minutes(self, float_time):
         hours = int(float_time)
@@ -122,6 +148,6 @@ class ISYCommunicationRequest(models.Model):
 
     def done_request(self):
         for rec in self:
-            if rec.env.user.login not in ('odooadmin@isyedu.org', rec.assign_person_id.assign_person_email, rec.approver_id.login):
+            if rec.env.user.login not in ('odooadmin@isyedu.org', rec.assign_person_id.assign_person_email):
                 raise ValidationError(_("You are not authorized to done this request."))
             rec.state = "done"

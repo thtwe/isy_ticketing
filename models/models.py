@@ -1072,6 +1072,8 @@ class IsyTicketingRequests(models.Model):
         return template
 
     def resolve_process(self):
+        if self.env.user.login != 'odooadmin@isyedu.org' and self.env.user.id not in self.user_ids.ids:
+            raise UserError(_("You are not authorized to resolve this request."))
         if self.key_type == 'transportation' and self.is_driver_allocated == False and not self.driver_id:
             raise UserError(_("Please allocate driver first"))
         if self.state == 'pendingresolution' and not self.fleet and self.key_type == 'transportation':
