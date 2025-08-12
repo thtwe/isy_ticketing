@@ -832,6 +832,19 @@ class IsyTicketingRequests(models.Model):
             self.add_follower(self)
             return result
 
+    @api.model
+    def get_view(self, view_id=None, view_type='form', **options):
+        result = super(IsyTicketingRequests, self).get_view(view_id, view_type, **options)
+        doc = etree.XML(result['arch'])
+        director_id = int(self.env['ir.config_parameter'].sudo().get_param('isy.director', 191))
+        if self._module == 'isy_ticketing' and self._name == 'isy.ticketing.requests' and self.env.user.id == director_id:
+            for node in doc.xpath("//button[@name='resolve_process']"):
+                node.set('invisible', "1")
+                node.set('modifiers', '{"invisible": true}')
+
+        result['arch'] = etree.tostring(doc, encoding='unicode')
+        return result
+
     def add_follower(self, record):
         res_list = []
         if record.user_ids:

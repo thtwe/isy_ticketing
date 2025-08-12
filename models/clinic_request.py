@@ -6,6 +6,7 @@ from odoo.tools import html2plaintext
 from odoo.addons.mail.models import mail_template
 from datetime import datetime, timedelta
 from pytz import timezone
+from lxml import etree
 
 import logging
 import math
@@ -173,6 +174,15 @@ class ISYClinicRequest(models.Model):
                 raise ValidationError(_("You are not authorized to done this request."))
             rec.state = "done"
 
-    def get_record_url(self):
-        url = "https://sas.isyedu.org/web#id=%s&action=1868&model=isy.clinic.request&view_type=form&menu_id=764" % (self.id,)
-        return url
+    @api.model
+    def get_view(self, view_id=None, view_type='form', **options):
+        result = super(ISYClinicRequest, self).get_view(view_id, view_type, **options)
+        doc = etree.XML(result['arch'])
+        director_id = int(self.env['ir.config_parameter'].sudo().get_param('isy.director', 191))
+        if self._module == 'isy_ticketing' and self._name == 'isy.clinic.request' and self.env.user.id == director_id:
+            for node in doc.xpath("//button[@name='done_request']"):
+                node.set('invisible', "1")
+                node.set('modifiers', '{"invisible": true}')
+
+        result['arch'] = etree.tostring(doc, encoding='unicode')
+        return result
