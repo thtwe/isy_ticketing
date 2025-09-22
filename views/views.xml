@@ -163,7 +163,7 @@
                                 <field name="location_address" readonly="1" invisible="key_type == 'transportation'"/> 
                                 <field name="is_old_location" invisible="1"/>
                                 <field name="stock_building_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False"/>
-                                <field name="stock_location_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False"/>
+                                <field name="stock_location_id" options="{'no_create': True}" readonly="state != 'draft'" required="key_type != 'transportation' and is_old_location == False" domain="[('location_id','=',stock_building_id)]"/>
                                 <field name="due_date" readonly="state != 'draft'" invisible="key_type == 'schedule'" required="key_type != 'schedule'"/>
                                 <field name="user_ids" widget="many2many_tags" readonly="True" invisible="key_type == 'schedule'" options="{'no_create': True}"/>
                                 <field name="approver_ids" invisible="key_type != 'maintenance'" options="{'no_create': True}"/>
@@ -335,7 +335,7 @@
                             <field name="building_id"  options="{'no_create': True}" readonly="state not in ['draft', 'waitingforapproval']" required="key_type != 'transportation' and is_old_location == True" invisible="key_type == 'transportation' or is_old_location == False"/>
                             <field name="location_id"  options="{'no_create': True}" readonly="state not in ['draft', 'waitingforapproval']" required="key_type != 'transportation' and is_old_location == True" invisible="key_type == 'transportation' or is_old_location == False"/>
                             <field name="stock_building_id"  options="{'no_create': True}" required="key_type != 'transportation' and is_old_location == False" invisible="key_type == 'transportation' or is_old_location == True"/>
-                            <field name="stock_location_id" options="{'no_create': True}"  required="1" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type == 'transportation' or is_old_location == True"/>
+                            <field name="stock_location_id" options="{'no_create': True}"  required="1" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type == 'transportation' or is_old_location == True" domain="[('location_id','=',stock_building_id)]"/>
                             <field name="is_old_location" invisible="1" />
                             <field name="all_day" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type != 'schedule'"/>
                             <field name="schedule_start_date" required="1" readonly="state not in ['draft', 'waitingforapproval']" invisible="key_type != 'schedule'"/>
@@ -381,6 +381,7 @@
                                         <tree editable="bottom">
                                             <field name="name" required="1"/>
                                             <field name="qty"/>
+                                            <field name="before_starttime"/>
                                             <field name="details_request_type" required="1"/>
                                         </tree>
                                     </field>

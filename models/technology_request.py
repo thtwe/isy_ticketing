@@ -5,6 +5,7 @@ from odoo.tools import email_split
 from odoo.tools import html2plaintext
 from odoo.addons.mail.models import mail_template
 import datetime
+from pytz import timezone
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -29,6 +30,23 @@ class ISYTechnologyRequest(models.Model):
     next_reminder = fields.Date(string="Last Reminder")
     parent_id = fields.Many2one('isy.ticketing.requests', string="Ref Request#")
     location_id = fields.Many2one('stock.location', string='Resource/Location', domain=[('usage','=','internal'),('location_id','!=',False)])
+    event_date = fields.Date(string='Event Date')
+    before_starttime = fields.Selection([('00', '00'), ('15', '15'), ('30', '30'), ('45', '45')], string="Before Start Time (Mins)", default="00")
+    start_time = fields.Float(string='Start Time', default=0.000)
+
+    def _check_event_date_start_time_end_time(self, event_date, start_time):
+        user_tz = self.env.user.tz or 'UTC'
+        now = fields.Datetime.context_timestamp(self, fields.Datetime.now()).astimezone(timezone(user_tz))
+        current_time_float = now.hour + now.minute / 60.0
+        today_date = str(fields.date.today())
+        if not event_date:
+            raise ValidationError(_("Event Date is required!"))
+
+        event_date = str(event_date)
+        if event_date < today_date:
+            raise ValidationError(_("Event Date must be after or equal current date!"))
+        if event_date == today_date and start_time > 0 and start_time < current_time_float:
+            raise ValidationError(_("Start Time must be after current time!"))
 
     def _technology_request_reminder(self):
         _logger.info("==================Reminder Checking For Technologpy Request Started!========================")
@@ -79,6 +97,7 @@ class ISYTechnologyRequest(models.Model):
 
     @api.model
     def create(self, vals):
+        self._check_event_date_start_time_end_time(vals.get('event_date'), vals.get('start_time'))
         if vals.get('name', 'New') == 'New':
             vals['name'] = self.env['ir.sequence'].next_by_code('isy.ticketing.requests.technology') or 'New'
         if not vals.get('request_person'):
@@ -88,6 +107,7 @@ class ISYTechnologyRequest(models.Model):
         if vals.get('assign_person'):
             if self.env.user.has_group('base.group_portal') and not self.env.user.portal_technology_request_user:
                 raise UserError("You don't have access to add assign person! Please contact OdooAdmin.")
+
         result = super(ISYTechnologyRequest, self).create(vals)
         self.sudo().add_follower(result)
         template = self._get_related_email_template(result.key_type, 'received')
@@ -98,6 +118,11 @@ class ISYTechnologyRequest(models.Model):
         return result
 
     def write(self, vals):
+        if 'event_date' in vals or 'start_time' in vals:
+            event_date = vals.get('event_date', self.event_date)
+            start_time = vals.get('start_time', self.start_time)
+            self._check_event_date_start_time_end_time(event_date, start_time)
+
         if vals.get('assign_person'):
             if self.env.user.has_group('base.group_portal') and not self.env.user.portal_technology_request_user:
                 raise UserError("You don't have access to add assign person! Please contact OdooAdmin.")

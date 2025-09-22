@@ -60,6 +60,9 @@
                             <field name="subject" required='1' readonly="from_email == True or state == 'done'"/>
                             <field name="body" required='1' readonly="from_email == True or state == 'done'"/>
                             <field name="location_id" required='1'/>
+                            <field name="event_date" string="Date" required='1'/><label for="start_time" string="Start Time"></label>
+                            <div><field name="start_time" required='1' widget="float_time" options="{'round_off': True}" class="oe_inline"/><span style='color:#9e9ead' class="oe_edit_only"> [ HH:MM:SS and 24 hrs format ]</span></div>
+                            <field name="before_starttime"/>
                         </group>
                      
                         <group>

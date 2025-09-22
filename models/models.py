@@ -64,12 +64,12 @@ class IsyTicketingRequests(models.Model):
     _name = 'isy.ticketing.requests'
     _inherit = 'mail.thread'
 
-    def _name_search(self,display_stock_building, args=None, operator='ilike', limit=100):
-        if operator == 'like': 
-            operator = 'ilike'
+    # def _name_search(self,display_stock_building, args=None, operator='ilike', limit=100):
+    #     if operator == 'like': 
+    #         operator = 'ilike'
 
-        versions=self.search([('display_stock_building', operator, display_stock_building)], limit=limit)
-        return versions.name_get()
+    #     versions=self.search([('display_stock_building', operator, display_stock_building)], limit=limit)
+    #     return versions.name_get()
     
     def _name_search_location(self,display_stock_location, args=None, operator='ilike', limit=100):
         if operator == 'like': 
@@ -113,10 +113,10 @@ class IsyTicketingRequests(models.Model):
     
     #new building and location
     stock_building_id = fields.Many2one('stock.location', string='Building', domain=[('usage','=','internal'),('location_id','=',False)])
-    stock_location_id = fields.Many2one('stock.location', string='Resource/Location', domain=[('usage','=','internal'),('location_id','!=',False)])
+    stock_location_id = fields.Many2one('stock.location', string='Resource/Location')
     is_old_location = fields.Boolean(string='Is old location(?)', default=False)
-    display_stock_building = fields.Char(string="Building", compute="_get_display_name",store=True,search=_name_search)
-    display_stock_location = fields.Char(string="Resource/Location", compute="_get_display_name_location",store=True,search=_name_search_location)
+    display_stock_building = fields.Char(string="Building", compute="_get_display_name",store=True) #,search=_name_search)
+    display_stock_location = fields.Char(string="Resource/Location", compute="_get_display_name_location",store=True) #,search=_name_search_location)
 
 
     equipment_id = fields.Many2one('product.product', string='Equipments')
@@ -875,18 +875,18 @@ class IsyTicketingRequests(models.Model):
                     }
                     res_list.append(reg)
 
-        if record.parent_id:
-            index = 0
-            while index < len(res_list):
-                if res_list[index].get('partner_id') != record.parent_id.create_uid.partner_id.id:
-                    res_list.append({
-                        'res_id': record.id,
-                        'res_model': 'isy.ticketing.requests',
-                        'partner_id': record.parent_id.create_uid.partner_id.id,
-                    })
-                    index += 1
-                else:
-                    index += 1
+        # if record.parent_id:
+        #     index = 0
+        #     while index < len(res_list):
+        #         if res_list[index].get('partner_id') != record.parent_id.create_uid.partner_id.id:
+        #             res_list.append({
+        #                 'res_id': record.id,
+        #                 'res_model': 'isy.ticketing.requests',
+        #                 'partner_id': record.parent_id.create_uid.partner_id.id,
+        #             })
+        #             index += 1
+        #         else:
+        #             index += 1
 
         if record.message_partner_ids:
             index = 0
@@ -957,6 +957,7 @@ class IsyTicketingRequests(models.Model):
         facility_objs = self.requests_details.filtered(lambda r: r.details_request_type == 'facility')
 
         fac_list = []
+        before_starttime = '00'
         if facility_objs:
             fac_dict = {}
             fac_desc_note = "This is from Schedule Request by "+self.create_uid.name+" for "+self.event_name+"\n***************************************** "
@@ -970,9 +971,13 @@ class IsyTicketingRequests(models.Model):
                 
             count = 1
             for fo in facility_objs:
+                before_starttime = fo.before_starttime if before_starttime == '00' and fo.before_starttime else '00'
                 fac_desc_note += "\n" + "Description-" + str(count) + ": " + str(fo.name) + "\n" + "Qty For Description-" + str(count) + ": " + str(fo.qty)
                 count += 1
-            
+
+            if before_starttime != '00':
+                fac_desc_note += "\n\n" + "***Facility requests must be prepared and ready at least " + str(before_starttime) + " minutes prior to the scheduled start time."
+
             fac_dict.update(
                     {
                             'key_type': 'maintenance',
@@ -983,15 +988,19 @@ class IsyTicketingRequests(models.Model):
                             'description': fac_desc_note,
                             'due_date':  str(self.schedule_start_date),
                             'parent_id': self.id,
+                            'before_starttime': before_starttime,
                             # 'create_uid': self.create_uid.id,
 
                     }
             )
-            new_obj_fac = self.env['isy.ticketing.requests'].sudo().create(fac_dict)
+            # new_obj_fac = self.env['isy.ticketing.requests'].sudo().create(fac_dict)
+            new_obj_fac = self.env['isy.ticketing.requests'].with_user(self.create_uid).sudo().create(fac_dict)
             #self.env.cr.execute(""" update isy_ticketing_requests set create_uid ="""+ str(self.create_uid.id)+""" where id="""+ str(new_obj_fac.id))
 
         technology_objs = self.requests_details.filtered(lambda r: r.details_request_type == 'technology')
         tech_list = []
+
+        before_starttime = '00'
         if technology_objs:
             irlr_objs = self.env['isy.resources.locations.reserved'].search([('request_id', '=', self.id)])
             tech_dict = {}
@@ -1002,11 +1011,16 @@ class IsyTicketingRequests(models.Model):
             #     tech_desc_note += "<br/>Repeat Type : "+ dict(self._fields['repeat_type'].selection).get(self.repeat_type)
             for irlr_obj in irlr_objs:
                 tech_desc_note += "<br/>Date From : " + str(irlr_obj.date_from) + " " + " To : " + str(irlr_obj.date_to) + "<br/>Location : " + str(irlr_obj.reserved_obj.complete_name)
-                
+
             count = 1
             for fo in technology_objs:
                 tech_desc_note += "<br/>" + "Description-" + str(count) + ": " + str(fo.name) + "<br/>" + "Qty For Description-" + str(count) + ": " + str(fo.qty)
+                before_starttime = fo.before_starttime if before_starttime == '00' and fo.before_starttime else '00'
                 count += 1
+
+            if before_starttime != '00':
+                tech_desc_note += "<br/><br/>" + "***Technology requests must be prepared and ready at least " + str(before_starttime) + " minutes prior to the scheduled start time."
+
             tech_dict.update(
                     {
                             #need to make dynamic request type id remaining
@@ -1016,23 +1030,15 @@ class IsyTicketingRequests(models.Model):
                             'request_person':  self.env['hr.employee'].search([('user_id', '=', self.create_uid.id)]).id,
                             'request_person_email': self.create_uid.login,
                             'parent_id': self.id,
-
-
-
+                            'location_id': self.stock_location_id.id,
+                            'event_date': self.schedule_start_date,
+                            'start_time': self.start_time,
+                            'before_starttime': before_starttime,
                     }
             )
-            new_obj_tech = self.env['isy.technology.request'].sudo().create(tech_dict)
-            #self.env.cr.execute(""" update isy_technology_request set create_uid ="""+ str(self.create_uid.id)+""" where id="""+ str(new_obj_tech.id))
+            # new_obj_tech = self.env['isy.technology.request'].sudo().create(tech_dict)
+            new_obj_tech = self.env['isy.technology.request'].with_user(self.create_uid).sudo().create(tech_dict)
 
-        #self.env.cr.commit()
-
-    # def time_to_localtz(self, val):
-    #     if val == 'start_time':
-    #         val_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(self.start_time * 60, 60))
-    #     elif val == 'end_time':
-    #         val_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(self.end_time * 60, 60))
-    #
-    #     return val_time
 
     def _get_related_email_template(self, check_key_type, val):
         template = self.env.ref('isy_ticketing.blank_template')
@@ -1288,6 +1294,7 @@ class IsyTicketingRequestsDetails(models.Model):
     qty = fields.Float(string="Qty", default=1)
     details_request_type = fields.Selection([('facility', 'Facility'), ('technology', 'Technology')], string="Request Type")
     ticket_id = fields.Many2one('isy.ticketing.requests', string="Ticket No.")
+    before_starttime = fields.Selection([('00', '00'), ('15', '15'), ('30', '30'), ('45', '45')], string="Before Start Time (Mins)", default="00")
 
 
 class IsyTechnicianNeeded(models.Model):

@@ -28,14 +28,15 @@ class CustomerPortal(CustomerPortal):
 
         searchbar_filters = {
             'all': {'label': _('All Status'), 'domain': []},
-            'state_waitingforapproval': {'label': _('Waiting For Approval'), 'domain': [('state', '=', 'waitingforapproval')]},
+            'state_waitingforapproval': {'label': _('Waiting For Approval'), 'domain': [('state', '=', 'request_for_approval')]},
+            'state_approved': {'label': _('Approved'), 'domain': [('state', '=', 'approved')]},
             'state_pendingresolution': {'label': _('Pending Resolution'), 'domain': [('state', '=', 'progress')]},
             'state_resolved': {'label': _('Resolved'), 'domain': [('state', '=', 'done')]},
             }
 
         searchbar_sortings = {
+            'name': {'label': _('Request Number'), 'order': 'name desc'},
             'request_date': {'label': _('Request Date'), 'order': 'create_date desc'},
-            'name': {'label': _('Reference'), 'order': 'name desc'},
             'state': {'label': _('Status'), 'order': 'state'},
         }
 
