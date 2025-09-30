@@ -33,6 +33,20 @@ class ISYTechnologyRequest(models.Model):
     event_date = fields.Date(string='Event Date')
     before_starttime = fields.Selection([('00', '00'), ('15', '15'), ('30', '30'), ('45', '45')], string="Before Start Time (Mins)", default="00")
     start_time = fields.Float(string='Start Time', default=0.000)
+    start_time_str = fields.Char(
+        string="Start Time (HH:MM)",
+        compute="_compute_start_time_str"
+    )
+
+    @api.depends('start_time')
+    def _compute_start_time_str(self):
+        for rec in self:
+            if rec.start_time:
+                hours = int(rec.start_time)
+                minutes = round((rec.start_time - hours) * 60)
+                rec.start_time_str = f"{hours:02d}:{minutes:02d}"
+            else:
+                rec.start_time_str = ""
 
     def _check_event_date_start_time_end_time(self, event_date, start_time):
         user_tz = self.env.user.tz or 'UTC'
